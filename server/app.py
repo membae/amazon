@@ -1,16 +1,19 @@
 from models import db,User,Category,Product,Order,OrderItem,Payment,ShoppingCart,Review
 from flask_migrate import Migrate
-from flask import Flask, request, make_response,jsonify
+from flask import Flask, request, make_response,jsonify,session
 from flask_restful import Api, Resource
 import os
 from werkzeug.security import generate_password_hash
 from flask_cors import CORS
+from werkzeug.security import check_password_hash,generate_password_hash
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get(
     "DB_URI", f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}")
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 CORS(app, origins=["http://localhost:3000"]) 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -19,6 +22,70 @@ app.json.compact = False
 migrate = Migrate(app, db)
 
 db.init_app(app)
+
+#register
+from werkzeug.security import generate_password_hash
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    
+    # Validate user data
+    if not data.get('name') or not data.get('email') or not data.get('password'):
+        return jsonify({"message": "All fields are required."}), 400
+    
+    # Check if email already exists
+    existing_user = User.query.filter_by(email=data['email']).first()
+    if existing_user:
+        return jsonify({"message": "Email already exists."}), 400
+    
+    # Hash the password using 'pbkdf2:sha256'
+    hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
+
+    new_user = User(
+        name=data['name'],
+        email=data['email'],
+        password=hashed_password,
+        address=data.get('address'),
+        phone_number=data.get('phone_number'),
+        role=data.get('role', 'customer')  # Default to 'customer'
+    )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"message": "User registered successfully!"}), 201
+
+#login
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    user = User.query.filter_by(email=data['email']).first()
+    if not user or not check_password_hash(user.password, data['password']):
+        return jsonify({"message": "Invalid email or password."}), 401
+    
+    # Store user information in session
+    session['user_id'] = user.id
+    session['user_name'] = user.name
+    session['user_email'] = user.email
+    session['user_role'] = user.role
+
+    return jsonify({"message": "Login successful!", "user": {"id": user.id, "name": user.name}}), 200
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()  # Clear the session
+    return jsonify({"message": "Logout successful!"}), 200
+
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return jsonify({"message": "User not logged in."}), 401
+
+    user_id = session['user_id']
+    user_name = session['user_name']
+    return jsonify({"id": user_id, "name": user_name})
 
 
 # Get all users

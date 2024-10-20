@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Cart({ cartItems, setCartItems }) {
+function CartPage({ cartItems, setCartItems }) {
   // Calculate total price
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
@@ -37,4 +37,4 @@ function Cart({ cartItems, setCartItems }) {
   );
 }
 
-export default Cart;
+export default CartPage;
