@@ -1,13 +1,185 @@
 body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
 }
+
+.product-group {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 100%;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Hides products going out of bounds */
+}
+
+h2 {
+  font-size: 1.8rem;
+  color: #555;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+
+/* Product list displayed in a single row */
+.product-list {
+  display: flex;
+  white-space: nowrap; /* Ensure items don't wrap to the next row */
+  overflow: hidden;
+  animation: scroll-left 100s linear infinite; /* Animation for scrolling */
+}
+
+.product-item {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 250px; /* Ensure each product takes up space and fits in one row */
+  flex: 0 0 auto; /* Prevent shrinking and allow scrolling */
+  margin-right: 20px; /* Adds space between items */
+}
+
+.product-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.product-item h3 {
+  font-size: 1.4rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.product-item p {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.product-item p.price {
+  font-size: 1.2rem;
+  color: #27ae60;
+  font-weight: bold;
+}
+
+/* Animation keyframes to move products from right to left */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@media (max-width: 768px) {
+  .product-item {
+    min-width: 200px; /* Adjust width for smaller screens */
+  }
+}
+
+/* Cart Icon */
+.cart-icon {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cart-icon:hover {
+  background-color: #f0f0f0;
+}
+
+.cart-count {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #dc3545;
+  color: #fff;
+  border-radius: 50%;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+/* Cart Styling */
+.cart {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background-color: #fff;
+  width: 300px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.cart-item h3 {
+  margin-bottom: 10px;
+}
+
+.cart-item button {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.cart-item button:hover {
+  background-color: #c82333;
+}
+
+.cart-total {
+  margin-top: 20px;
+  text-align: right;
+  font-size: 1.5rem;
+}
+
+/* Styling the Add to Cart button */
+.product-item button {
+  background-color: #007bff; /* Primary blue color */
+  color: #fff; /* White text */
+  border: none; /* No border */
+  padding: 10px 15px; /* Padding for button */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 1rem; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */
+}
+
+.product-item button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+/* If button is clicked, it gives active feedback */
+.product-item button:active {
+  background-color: #003d82; /* Even darker blue when clicked */
+  transform: scale(0.98); /* Slightly shrink on click */
+}
+

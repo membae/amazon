@@ -10,10 +10,10 @@ metadata = MetaData(naming_convention={
 
 db = SQLAlchemy(metadata=metadata)
 
-
 # Users Table
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
+    serialize_only = ('id', 'name', 'email', 'address', 'phone_number', 'role')  # Fields to serialize
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -28,10 +28,10 @@ class User(db.Model, SerializerMixin):
     shopping_cart = db.relationship('ShoppingCart', back_populates='user', lazy=True)
 
 # Categories Table
-# Categories Table
 class Category(db.Model, SerializerMixin):
     __tablename__ = 'categories'
-    
+    serialize_only = ('id', 'name', 'description', 'level', 'parent_id')  # Fields to serialize
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255), nullable=True)
@@ -44,7 +44,8 @@ class Category(db.Model, SerializerMixin):
 # Products Table
 class Product(db.Model, SerializerMixin):
     __tablename__ = 'products'
-    
+    serialize_only = ('-category.products','id', 'name', 'description', 'price', 'stock', 'category_id', 'brand', 'image_url')  # Fields to serialize
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -62,7 +63,8 @@ class Product(db.Model, SerializerMixin):
 # Orders Table
 class Order(db.Model, SerializerMixin):
     __tablename__ = 'orders'
-    
+    serialize_only = ('id', 'user_id', 'order_status', 'total_amount', 'shipping_address', 'payment_method')  # Fields to serialize
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     order_status = db.Column(db.String(50), nullable=False, default='Pending')  # e.g., Pending, Shipped, Delivered
@@ -77,7 +79,8 @@ class Order(db.Model, SerializerMixin):
 # Order_Items Table
 class OrderItem(db.Model, SerializerMixin):
     __tablename__ = 'order_items'
-    
+    serialize_only = ('id', 'order_id', 'product_id', 'quantity', 'price_at_purchase', 'total_price')  # Fields to serialize
+
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
@@ -91,7 +94,8 @@ class OrderItem(db.Model, SerializerMixin):
 # Payments Table
 class Payment(db.Model, SerializerMixin):
     __tablename__ = 'payments'
-    
+    serialize_only = ('id', 'order_id', 'payment_status', 'payment_method', 'total_amount', 'transaction_id')  # Fields to serialize
+
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
     payment_status = db.Column(db.String(50), nullable=False, default='Pending')  # e.g., Pending, Completed, Failed
@@ -104,7 +108,8 @@ class Payment(db.Model, SerializerMixin):
 # Shopping_Cart Table
 class ShoppingCart(db.Model, SerializerMixin):
     __tablename__ = 'shopping_cart'
-    
+    serialize_only = ('id', 'user_id', 'product_id', 'quantity')  # Fields to serialize
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
@@ -116,7 +121,8 @@ class ShoppingCart(db.Model, SerializerMixin):
 # Reviews Table
 class Review(db.Model, SerializerMixin):
     __tablename__ = 'reviews'
-    
+    serialize_only = ('id', 'product_id', 'user_id', 'rating', 'comment')  # Fields to serialize
+
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -125,4 +131,3 @@ class Review(db.Model, SerializerMixin):
 
     product = db.relationship('Product', back_populates='reviews')
     user = db.relationship('User', back_populates='reviews')
-
