@@ -14,7 +14,7 @@ DATABASE = os.environ.get(
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-CORS(app, origins=["http://localhost:3000"]) 
+CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
@@ -93,6 +93,22 @@ def profile():
 def get_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users]), 200
+
+
+
+# @app.route('/users', methods=['GET'])
+# def get_current_user():
+#     # Ensure the user is logged in and has a valid session
+#     user_id = session.get('user_id')  # Assuming you store user ID in session
+#     if user_id is None:
+#         return jsonify({"error": "User not logged in"}), 401
+
+#     user = User.query.get(user_id)
+#     if user is None:
+#         return jsonify({"error": "User not found"}), 404
+    
+#     return jsonify(user.to_dict()), 200
+
 
 # Get a specific user by ID
 @app.route('/users/<int:user_id>', methods=['GET'])

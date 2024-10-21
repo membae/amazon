@@ -27,7 +27,7 @@ const Signup = () => {
         try {
             const response = await axios.post(' http://127.0.0.1:5555/register', formData);
             alert(response.data.message); // Display success message
-            navigate('/signin'); // Redirect to signin after successful signup
+            navigate('/'); // Redirect to signin after successful signup
         } catch (error) {
             alert(error.response.data.message); // Display error message
         }

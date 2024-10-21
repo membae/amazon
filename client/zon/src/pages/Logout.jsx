@@ -1,13 +1,14 @@
-// src/components/Auth/Logout.js
-import React from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Logout = () => {
+    const navigate = useNavigate(); // Get the navigate function for navigation
+
     const handleLogout = async () => {
         try {
-            await axios.post('/api/logout');
+            await axios.post('/api/logout'); // Logout API call
             sessionStorage.removeItem('user'); // Clear user from session storage
             alert('Logout successful!');
+            navigate('/signin'); // Redirect to the sign-in page
         } catch (error) {
             alert('Error logging out.'); // Handle error
         }
@@ -15,5 +16,3 @@ const Logout = () => {
 
     return <button onClick={handleLogout}>Logout</button>;
 };
-
-export default Logout;

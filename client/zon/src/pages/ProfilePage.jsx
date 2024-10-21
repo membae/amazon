@@ -1,65 +1,149 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
 
-// Mock functions to simulate fetching user and order details (replace with your actual API calls)
-const fetchUserDetails = () => {
-  return {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "123-456-7890",
-    address: "123 Main St, Springfield",
-  };
+// Function to fetch the currently logged-in user's details
+const fetchUserDetails = async () => {
+  try {
+    const user_id = Cookies.get("user_id");
+    if (!user_id) throw new Error("User ID not found in cookies");
+
+    const response = await fetch(`http://127.0.0.1:5555/users/${user_id}`, {
+      credentials: "include", // Ensure cookies are included with the request
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user details");
+    }
+
+    const data = await response.json();
+    console.log("User details fetched successfully:", data);
+    return data;
+  } catch (err) {
+    console.error("Error fetching user details:", err.message);
+    throw err;
+  }
 };
 
-const fetchUserOrders = () => {
-  return [
-    { id: 1, product: "Laptop", date: "2024-10-10", price: "$1200" },
-    { id: 2, product: "Smartphone", date: "2024-09-20", price: "$800" },
-  ];
+// Function to fetch user orders using cookies
+const fetchUserOrders = async () => {
+  try {
+    const response = await fetch("http://127.0.0.1:5555/orders", {
+      credentials: "include", // Ensure cookies are included with the request
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch orders");
+    }
+
+    const data = await response.json();
+    console.log("User orders fetched successfully:", data);
+    return data;
+  } catch (err) {
+    console.error("Error fetching user orders:", err.message);
+    throw err;
+  }
 };
 
 const ProfilePage = () => {
-  const [user, setUser] = useState({});
+  // Initialize state from cookies or empty values
+  const [user, setUser] = useState({
+    name: Cookies.get("user_name") || "",
+    email: Cookies.get("user_email") || "",
+    phone: Cookies.get("user_phone") || "",
+    address: Cookies.get("user_address") || "", // If you store address in cookies
+  });
+
   const [orders, setOrders] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [viewOrders, setViewOrders] = useState(false);
-  const [updatedUser, setUpdatedUser] = useState({});
+  const [updatedUser, setUpdatedUser] = useState(user); // Start with user details from cookies
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const userDetails = fetchUserDetails();
-    const userOrders = fetchUserOrders();
-    setUser(userDetails);
-    setUpdatedUser(userDetails);
-    setOrders(userOrders);
-  }, []);
+    // Fetch user details once when the component mounts
+    fetchUserDetails()
+      .then((userDetails) => {
+        setUser(userDetails);
+        setUpdatedUser(userDetails); // Initialize updatedUser with fetched userDetails
+        console.log("User state set:", userDetails);
+      })
+      .catch((err) => {
+        setError(err.message);
+        console.error("Error in fetching user details:", err.message);
+      });
+
+    // Fetch user orders once when the component mounts
+    fetchUserOrders()
+      .then((userOrders) => {
+        setOrders(userOrders);
+        console.log("Orders state set:", userOrders);
+      })
+      .catch((err) => {
+        setError(err.message);
+        console.error("Error in fetching user orders:", err.message);
+      });
+  }, []); // Empty dependency array ensures this runs only once, when the component mounts
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
+    console.log("Edit mode toggled:", !isEditing);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUpdatedUser((prev) => ({ ...prev, [name]: value }));
+    console.log(`Field '${name}' updated to:`, value);
   };
 
-  const handleSave = () => {
-    // API call to update user details
-    console.log("Updated user details:", updatedUser);
-    setUser(updatedUser);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const response = await axios.put(
+        `http://127.0.0.1:5555/users/${user.id}`,
+        updatedUser,
+        {
+          withCredentials: true, // Ensure cookies are included with the request
+        }
+      );
+      console.log("Updated user details:", response.data);
+      setUser(updatedUser);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating user details:", error);
+      setError("Failed to save changes.");
+    }
   };
 
-  const handleSignOut = () => {
-    // Logic for signing out the user
-    console.log("User signed out");
+  const handleSignOut = async () => {
+    try {
+      await axios.post(
+        "http://127.0.0.1:5555/logout",
+        {},
+        {
+          withCredentials: true, // Ensure cookies are included with the request
+        }
+      );
+      Cookies.remove("user_id");
+      Cookies.remove("user_name");
+      Cookies.remove("user_email");
+      Cookies.remove("user_phone");
+      Cookies.remove("user_address");
+      console.log("User signed out, cookies cleared");
+      alert("Logout successful!");
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error signing out:", error);
+      alert("Error logging out. Please try again.");
+    }
   };
 
   const handleSwitchAccount = () => {
-    // Logic for switching accounts
     console.log("Switching account");
   };
 
   const toggleOrders = () => {
     setViewOrders(!viewOrders);
+    console.log("Orders view toggled:", !viewOrders);
   };
 
   return (
@@ -88,7 +172,7 @@ const ProfilePage = () => {
                 <input
                   type="text"
                   name="name"
-                  value={updatedUser.name}
+                  value={updatedUser.name || ""}
                   onChange={handleChange}
                 />
               </div>
@@ -98,7 +182,7 @@ const ProfilePage = () => {
                 <input
                   type="email"
                   name="email"
-                  value={updatedUser.email}
+                  value={updatedUser.email || ""}
                   onChange={handleChange}
                 />
               </div>
@@ -108,7 +192,7 @@ const ProfilePage = () => {
                 <input
                   type="tel"
                   name="phone"
-                  value={updatedUser.phone}
+                  value={updatedUser.phone || ""}
                   onChange={handleChange}
                 />
               </div>
@@ -118,7 +202,7 @@ const ProfilePage = () => {
                 <input
                   type="text"
                   name="address"
-                  value={updatedUser.address}
+                  value={updatedUser.address || ""}
                   onChange={handleChange}
                 />
               </div>
@@ -172,6 +256,9 @@ const ProfilePage = () => {
           )}
         </div>
       )}
+
+      {/* Show error if any */}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };

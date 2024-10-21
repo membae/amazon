@@ -1,6 +1,5 @@
-// src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProductsPage from './pages/ProductsPage';
@@ -9,27 +8,39 @@ import BalancePage from './pages/BalancePage';
 import ProfilePage from './pages/ProfilePage';
 import Signup from './pages/Signup';
 import Signin from './pages/Signin';
-// // import CartPage from './pages/CartPage';
-// import LoginPage from './pages/LoginPage';
-// import RegisterPage from './pages/RegisterPage';
 
 const App = () => {
+    const location = useLocation();  // Use location hook to get current path
+
+    // Paths where we don't want to show the Navbar and Footer
+    const noNavFooterRoutes = ['/signin', '/signup'];
+
     return (
-        <Router>
-            <Navbar />
+        <>
+            {/* Conditionally render Navbar if not on signin/signup */}
+            {!noNavFooterRoutes.includes(location.pathname) && <Navbar />}
+
             <Routes>
                 <Route path="/" element={<ProductsPage />} /> 
-                <Route path="/signup" element={<Signup />} /> {/* Home page */}
-                <Route path="/signin" element={<Signin />} /> 
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/signin" element={<Signin />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/wallet" element={<BalancePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                
-                {/* <Route path="/register" element={<RegisterPage />} /> */}
             </Routes>
-            <Footer />
+
+            {/* Conditionally render Footer if not on signin/signup */}
+            {!noNavFooterRoutes.includes(location.pathname) && <Footer />}
+        </>
+    );
+};
+
+const WrappedApp = () => {
+    return (
+        <Router>
+            <App />
         </Router>
     );
 };
 
-export default App;
+export default WrappedApp;
