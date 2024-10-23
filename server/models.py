@@ -13,7 +13,7 @@ db = SQLAlchemy(metadata=metadata)
 # Users Table
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
-    serialize_only = ('id', 'name', 'email', 'address', 'phone_number', 'role')  # Fields to serialize
+    serialize_only = ('id', 'name', 'email', 'address', 'phone_number', 'role', 'balance')  # Added 'balance' for serialization
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -21,11 +21,24 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.String(200), nullable=False)
     address = db.Column(db.String(200), nullable=True)
     phone_number = db.Column(db.String(15), nullable=True)
+    # balance = db.Column(db.Float, default=0.0)
     role = db.Column(db.String(50), nullable=False, default='customer')  # 'admin' or 'customer'
 
     orders = db.relationship('Order', back_populates='user', lazy=True)
     reviews = db.relationship('Review', back_populates='user', lazy=True)
     shopping_cart = db.relationship('ShoppingCart', back_populates='user', lazy=True)
+    balance = db.relationship('Balance', back_populates='user', uselist=False)  # One-to-One relationship with Balance
+
+# Balance Table
+class Balance(db.Model, SerializerMixin):
+    __tablename__ = 'balances'
+    serialize_only = ('user_id', 'amount')  # Fields to serialize
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    amount = db.Column(db.Float, nullable=False, default=0.0)  # Initial balance is 0.0
+
+    user = db.relationship('User', back_populates='balance')
 
 # Categories Table
 class Category(db.Model, SerializerMixin):
@@ -44,7 +57,7 @@ class Category(db.Model, SerializerMixin):
 # Products Table
 class Product(db.Model, SerializerMixin):
     __tablename__ = 'products'
-    serialize_only = ('-category.products','id', 'name', 'description', 'price', 'stock', 'category_id', 'brand', 'image_url')  # Fields to serialize
+    serialize_only = ('id', 'name', 'description', 'price', 'stock', 'category_id', 'brand', 'image_url')  # Fields to serialize
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

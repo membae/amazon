@@ -28,7 +28,10 @@ const fetchUserDetails = async () => {
 // Function to fetch user orders using cookies
 const fetchUserOrders = async () => {
   try {
-    const response = await fetch("http://127.0.0.1:5555/orders", {
+    const user_id = Cookies.get("user_id");
+    if (!user_id) throw new Error("User ID not found in cookies");
+
+    const response = await fetch(`http://127.0.0.1:5555/orders/${user_id}`, {
       credentials: "include", // Ensure cookies are included with the request
     });
 
@@ -50,8 +53,8 @@ const ProfilePage = () => {
   const [user, setUser] = useState({
     name: Cookies.get("user_name") || "",
     email: Cookies.get("user_email") || "",
-    phone: Cookies.get("user_phone") || "",
-    address: Cookies.get("user_address") || "", // If you store address in cookies
+    phone_number: Cookies.get("user_phone") || "", // Changed to phone_number
+    address: Cookies.get("user_address") || "",
   });
 
   const [orders, setOrders] = useState([]);
@@ -98,9 +101,9 @@ const ProfilePage = () => {
 
   const handleSave = async () => {
     try {
-      const response = await axios.put(
+      const response = await axios.patch(
         `http://127.0.0.1:5555/users/${user.id}`,
-        updatedUser,
+        updatedUser,  // Only send the updated fields
         {
           withCredentials: true, // Ensure cookies are included with the request
         }
@@ -123,6 +126,7 @@ const ProfilePage = () => {
           withCredentials: true, // Ensure cookies are included with the request
         }
       );
+      // Clear cookies on sign out
       Cookies.remove("user_id");
       Cookies.remove("user_name");
       Cookies.remove("user_email");
@@ -191,8 +195,8 @@ const ProfilePage = () => {
                 <label>Phone:</label>
                 <input
                   type="tel"
-                  name="phone"
-                  value={updatedUser.phone || ""}
+                  name="phone_number" // Changed to phone_number
+                  value={updatedUser.phone_number || ""}
                   onChange={handleChange}
                 />
               </div>
@@ -225,7 +229,7 @@ const ProfilePage = () => {
 
               <div>
                 <label>Phone:</label>
-                <span>{user.phone}</span>
+                <span>{user.phone_number}</span> {/* Changed to phone_number */}
               </div>
 
               <div>

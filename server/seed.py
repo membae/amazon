@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from app import app
-from models import db, User, Category, Product, Order, OrderItem, Payment, ShoppingCart, Review
+from models import db, User, Balance, Category, Product, Order, OrderItem, Payment, ShoppingCart, Review
 
 with app.app_context():
 
@@ -14,6 +14,11 @@ with app.app_context():
     user1 = User(name="John Doe", email="john@example.com", password="hashedpassword", role="customer")
     user2 = User(name="Jane Smith", email="jane@example.com", password="hashedpassword", role="admin")
     users = [user1, user2]
+
+    # Create balances for users
+    balance1 = Balance(user=user1, amount=500.0)  # Initial balance for John
+    balance2 = Balance(user=user2, amount=1000.0)  # Initial balance for Jane
+    balances = [balance1, balance2]
 
     print("Creating categories...")
     category1 = Category(name="Electronics", description="Devices and gadgets", level="VIP1")
@@ -54,6 +59,9 @@ with app.app_context():
 
     print("Creating payments...")
     payment1 = Payment(order=order1, payment_status="Completed", payment_method="Credit Card", total_amount=order1.total_amount)
+
+    # Deduct the total amount from the user's balance after the payment is processed
+    balance1.amount -= order1.total_amount  # Update John's balance
     payments = [payment1]
 
     print("Creating shopping cart...")
@@ -65,7 +73,9 @@ with app.app_context():
     review2 = Review(product=vip2_products[0], user=user2, rating=4, comment="Good quality for the price.")
     reviews = [review1, review2]
 
+    # Add all entities to the session
     db.session.add_all(users)
+    db.session.add_all(balances)  # Add balances to the session
     db.session.add_all(categories)
     db.session.add_all(products)
     db.session.add_all(orders)
@@ -73,6 +83,8 @@ with app.app_context():
     db.session.add_all(payments)
     db.session.add_all(shopping_cart_items)
     db.session.add_all(reviews)
+    
+    # Commit the session to save all data to the database
     db.session.commit()
 
     print("Seeding done!")

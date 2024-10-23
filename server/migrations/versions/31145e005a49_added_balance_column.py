@@ -1,8 +1,8 @@
-"""first
+"""added balance column
 
-Revision ID: 9709646d540b
+Revision ID: 31145e005a49
 Revises: 
-Create Date: 2024-10-20 11:39:21.130186
+Create Date: 2024-10-23 09:05:00.625063
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9709646d540b'
+revision = '31145e005a49'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,6 +37,14 @@ def upgrade():
     sa.Column('role', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
+    )
+    op.create_table('balances',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('amount', sa.Float(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_balances_user_id_users')),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -112,6 +120,7 @@ def downgrade():
     op.drop_table('order_items')
     op.drop_table('products')
     op.drop_table('orders')
+    op.drop_table('balances')
     op.drop_table('users')
     op.drop_table('categories')
     # ### end Alembic commands ###

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 // Component for payment options
 const PaymentOptions = ({ onSelect }) => {
@@ -12,30 +14,64 @@ const PaymentOptions = ({ onSelect }) => {
 };
 
 function BalancePage() {
-  const [balance, setBalance] = useState(() => {
-    const savedBalance = localStorage.getItem("balance");
-    return savedBalance ? parseFloat(savedBalance) : 0; // Initialize balance from localStorage or set to 0
-  });
+  const [balance, setBalance] = useState(0); // Initialize balance to 0
   const [rechargeAmount, setRechargeAmount] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState(0);
   const [error, setError] = useState("");
   const [notification, setNotification] = useState(""); // State for notifications
   const [showPaymentOptions, setShowPaymentOptions] = useState(false); // State to toggle payment options
 
+  // Fetch the balance for the currently logged-in user
   useEffect(() => {
-    localStorage.setItem("balance", balance); // Persist balance to localStorage
-  }, [balance]);
+    const fetchBalance = async () => {
+      try {
+        const user_id = Cookies.get("user_id"); // Assuming user_id is stored in cookies
+        if (!user_id) throw new Error("User ID not found");
+
+        const response = await axios.get(`http://127.0.0.1:5555/users/${user_id}/balance`, {
+          withCredentials: true, // Send cookies with the request if needed
+        });
+
+        if (response.status === 200) {
+          setBalance(response.data.balance); // Assuming the balance is returned in response.data.balance
+        } else {
+          throw new Error("Failed to fetch balance");
+        }
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchBalance();
+  }, []);
 
   const handleRecharge = () => {
     if (rechargeAmount <= 0) {
       setError("Recharge amount must be greater than 0.");
       return;
     }
-    setBalance((prevBalance) => prevBalance + parseFloat(rechargeAmount));
-    setRechargeAmount(0);
-    setError("");
-    setNotification(`Successfully recharged $${rechargeAmount}`); // Set notification
-    setTimeout(() => setNotification(""), 3000); // Clear notification after 3 seconds
+
+    // Make an API call to recharge the balance (adjust this to your backend logic)
+    const rechargeBalance = async () => {
+      try {
+        const user_id = Cookies.get("user_id");
+        const response = await axios.post(`http://127.0.0.1:5555/users/${user_id}/recharge`, {
+          amount: rechargeAmount,
+        }, { withCredentials: true });
+
+        if (response.status === 200) {
+          setBalance((prevBalance) => prevBalance + parseFloat(rechargeAmount));
+          setNotification(`Successfully recharged $${rechargeAmount}`);
+          setRechargeAmount(0);
+        } else {
+          throw new Error("Failed to recharge balance");
+        }
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    rechargeBalance();
     setShowPaymentOptions(false); // Hide payment options after recharge
   };
 
@@ -48,11 +84,28 @@ function BalancePage() {
       setError("Insufficient balance for this withdrawal.");
       return;
     }
-    setBalance((prevBalance) => prevBalance - parseFloat(withdrawAmount));
-    setWithdrawAmount(0);
-    setError("");
-    setNotification(`Successfully withdrew $${withdrawAmount}`); // Set notification
-    setTimeout(() => setNotification(""), 3000); // Clear notification after 3 seconds
+
+    // Make an API call to withdraw the balance (adjust this to your backend logic)
+    const withdrawBalance = async () => {
+      try {
+        const user_id = Cookies.get("user_id");
+        const response = await axios.post(`http://127.0.0.1:5555/users/${user_id}/withdraw`, {
+          amount: withdrawAmount,
+        }, { withCredentials: true });
+
+        if (response.status === 200) {
+          setBalance((prevBalance) => prevBalance - parseFloat(withdrawAmount));
+          setNotification(`Successfully withdrew $${withdrawAmount}`);
+          setWithdrawAmount(0);
+        } else {
+          throw new Error("Failed to withdraw balance");
+        }
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    withdrawBalance();
   };
 
   return (

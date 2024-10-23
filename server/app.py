@@ -1,4 +1,4 @@
-from models import db,User,Category,Product,Order,OrderItem,Payment,ShoppingCart,Review
+from models import db,User,Category,Product,Order,OrderItem,Payment,ShoppingCart,Review,Balance
 from flask_migrate import Migrate
 from flask import Flask, request, make_response,jsonify,session
 from flask_restful import Api, Resource
@@ -183,6 +183,101 @@ def delete_user(user_id):
     db.session.commit()
     return jsonify({"message": "User deleted successfully"}), 200
 
+
+@app.route('/users/<int:user_id>/balance', methods=['GET'])
+def get_user_balance(user_id):
+    """Get the balance for a specific user by user ID."""
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    balance = user.balance
+    if not balance:
+        return jsonify({'message': 'Balance not found'}), 404
+
+    return jsonify({
+        'user_id': user.id,
+        'balance': balance.amount
+    }), 200
+
+# # Alternative route to get balance by email
+# @app.route('/api/user/balance', methods=['GET'])
+# def get_balance_by_email():
+#     """Get the balance for a specific user by email."""
+#     email = request.args.get('email')
+#     if not email:
+#         return jsonify({'message': 'Email is required'}), 400
+
+#     user = User.query.filter_by(email=email).first()
+#     if not user:
+#         return jsonify({'message': 'User not found'}), 404
+
+#     balance = user.balance
+#     if not balance:
+#         return jsonify({'message': 'Balance not found'}), 404
+
+#     return jsonify({
+#         'user_id': user.id,
+#         'balance': balance.amount
+#     }), 200
+
+@app.route('/users/<int:user_id>/balance', methods=['POST'])
+def create_user_balance(user_id):
+    """Create a balance for a specific user by user ID."""
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    # Get the amount from the request body
+    data = request.get_json()
+    if not data or 'amount' not in data:
+        return jsonify({'message': 'Amount is required'}), 400
+
+    amount = data['amount']
+
+    # Create a new balance
+    new_balance = Balance(user_id=user.id, amount=amount)
+    db.session.add(new_balance)
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Balance created successfully',
+        'user_id': user.id,
+        'balance': new_balance.amount
+    }), 201
+
+@app.route('/users/<int:user_id>/balance', methods=['PATCH'])
+def update_user_balance(user_id):
+    """Update the balance for a specific user by user ID."""
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    balance = user.balance
+    if not balance:
+        return jsonify({'message': 'Balance not found'}), 404
+
+    # Get the new amount from the request body
+    data = request.get_json()
+    if not data or 'amount' not in data:
+        return jsonify({'message': 'Amount is required'}), 400
+
+    new_amount = data['amount']
+    balance.amount = new_amount  # Update the balance amount
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Balance updated successfully',
+        'user_id': user.id,
+        'balance': balance.amount
+    }), 200
+
+
+
+
+
+
+
 #categories
 
 
@@ -363,10 +458,10 @@ def delete_product(product_id):
 # ------------------------------
 
 # 1. Get all orders
-@app.route('/orders', methods=['GET'])
-def get_orders():
-    orders = Order.query.all()
-    return jsonify([order.to_dict() for order in orders]), 200
+# @app.route('/orders', methods=['GET'])
+# def get_orders():
+#     orders = Order.query.all()
+#     return jsonify([order.to_dict() for order in orders]), 200
 
 # 2. Get a specific order by ID
 @app.route('/orders/<int:order_id>', methods=['GET'])
@@ -375,6 +470,53 @@ def get_order(order_id):
     if order is None:
         return jsonify({"error": "Order not found"}), 404
     return jsonify(order.to_dict()), 200
+
+
+# Fetch all orders for the logged-in user
+@app.route('/orders', methods=['GET'])
+def get_orders():
+    # Get the user ID from the cookies
+    user_id = request.cookies.get('user_id')
+
+    if not user_id:
+        return jsonify({"error": "User ID not found"}), 401
+
+    # Fetch the orders for the logged-in user
+    orders = Order.query.filter_by(user_id=user_id).all()
+
+    if not orders:
+        return jsonify({"message": "No orders found for this user"}), 404
+
+    # Convert orders to dictionary format
+    orders_dict = [order.to_dict() for order in orders]
+    
+    return jsonify({"orders": orders_dict}), 200
+
+# Add a product to the cart (order)
+@app.route('/add_to_cart', methods=['POST'])
+def add_to_cart():
+    user_id = request.cookies.get('user_id')
+
+    if not user_id:
+        return jsonify({"error": "User ID not found"}), 401
+
+    data = request.get_json()
+
+    # Assume data contains 'product_id' and 'quantity'
+    product_id = data.get('product_id')
+    quantity = data.get('quantity')
+
+    if not product_id or not quantity:
+        return jsonify({"error": "Product ID and quantity are required"}), 400
+
+    # Add the product to the user's cart (this could be a separate Cart model or an Order with a 'cart' status)
+    new_order = Order(user_id=user_id, product_id=product_id, quantity=quantity, status='cart')
+    db.session.add(new_order)
+    db.session.commit()
+
+    return jsonify({"message": "Product added to cart"}), 201
+
+
 
 # 3. Create a new order
 @app.route('/orders', methods=['POST'])
@@ -656,7 +798,7 @@ def get_shopping_cart(user_id):
 
 # 2. Add a product to the shopping cart
 @app.route('/users/<int:user_id>/cart', methods=['POST'])
-def add_to_cart(user_id):
+def add_newitem_to_cart(user_id):
     data = request.get_json()
 
     if 'product_id' not in data or 'quantity' not in data:
@@ -799,6 +941,10 @@ def delete_review(review_id):
     db.session.commit()
 
     return jsonify({"message": "Review deleted successfully"}), 200
+
+
+
+
 
 
 

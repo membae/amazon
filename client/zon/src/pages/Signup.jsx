@@ -1,7 +1,7 @@
-// src/components/Auth/Signup.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Import useNavigate hook
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie'; // Import js-cookie to manage cookies
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -12,7 +12,8 @@ const Signup = () => {
         phone_number: ''
     });
 
-    const navigate = useNavigate();  // Create navigate function
+    const [errorMessage, setErrorMessage] = useState(''); // To display validation errors
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -22,14 +23,38 @@ const Signup = () => {
         });
     };
 
+    const validateForm = () => {
+        const { name, email, password, address, phone_number } = formData;
+
+        if (!name || !email || !password || !address || !phone_number) {
+            setErrorMessage('All fields are required!');
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMessage(''); // Reset error message
+
+        if (!validateForm()) {
+            return; // Do not proceed if validation fails
+        }
+
         try {
-            const response = await axios.post(' http://127.0.0.1:5555/register', formData);
+            const response = await axios.post('http://127.0.0.1:5555/register', formData, { withCredentials: true });
             alert(response.data.message); // Display success message
-            navigate('/'); // Redirect to signin after successful signup
+            
+            // Assuming the server sets a cookie on successful registration
+            const { token } = response.data; // Adjust based on your server's response
+            if (token) {
+                Cookies.set('token', token); // Save token in cookies if needed
+            }
+
+            navigate('/'); // Redirect to sign-in page
         } catch (error) {
-            alert(error.response.data.message); // Display error message
+            setErrorMessage(error.response.data.message || 'Error registering. Please try again.');
         }
     };
 
@@ -40,10 +65,13 @@ const Signup = () => {
                 <input name="name" placeholder="Name" onChange={handleChange} required />
                 <input name="email" placeholder="Email" type="email" onChange={handleChange} required />
                 <input name="password" placeholder="Password" type="password" onChange={handleChange} required />
-                <input name="address" placeholder="Address" onChange={handleChange} />
-                <input name="phone_number" placeholder="Phone Number" onChange={handleChange} />
+                <input name="address" placeholder="Address" onChange={handleChange} required />
+                <input name="phone_number" placeholder="Phone Number" onChange={handleChange} required />
                 <button type="submit">Register</button>
             </form>
+
+            {/* Show validation or server error messages */}
+            {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         </div>
     );
 };
