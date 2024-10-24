@@ -3,25 +3,26 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 function ProductPage() {
-  const [balance, setBalance] = useState(0); // Initialize balance to 0
-  const [products, setProducts] = useState([]); // State to store products
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(""); // State for error handling
-  const [purchaseError, setPurchaseError] = useState(""); // State for purchase error
+  const [balance, setBalance] = useState(0);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [purchaseError, setPurchaseError] = useState("");
+  const [orderId, setOrderId] = useState(null);
 
   // Fetch the user's balance when the component loads
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const user_id = Cookies.get("user_id"); // Assuming user_id is stored in cookies
+        const user_id = Cookies.get("user_id");
         if (!user_id) throw new Error("User ID not found");
 
         const response = await axios.get(`http://127.0.0.1:5555/users/${user_id}/balance`, {
-          withCredentials: true, // Send cookies with the request if needed
+          withCredentials: true,
         });
 
         if (response.status === 200) {
-          setBalance(response.data.balance); // Update balance
+          setBalance(response.data.balance);
         } else {
           throw new Error("Failed to fetch balance");
         }
@@ -37,16 +38,16 @@ function ProductPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:5555/products"); // Replace with your actual API endpoint for products
+        const response = await axios.get("http://127.0.0.1:5555/products");
         if (response.status === 200) {
-          setProducts(response.data); // Assuming the products are returned in response.data
-          setLoading(false); // Stop loading once products are fetched
+          setProducts(response.data);
         } else {
           throw new Error("Failed to fetch products");
         }
       } catch (err) {
         setError(err.message);
-        setLoading(false);
+      } finally {
+        setLoading(false); // Set loading to false regardless of success or failure
       }
     };
 
@@ -55,109 +56,118 @@ function ProductPage() {
 
   // Handle product purchase
   const handleBuy = async (product) => {
-    setPurchaseError(""); // Clear any previous purchase errors
+    setPurchaseError("");
 
-    if (balance >= product.price) {
-      // Sufficient balance
-      try {
-        const user_id = Cookies.get("user_id"); // Assuming user_id is stored in cookies
+    if (balance < product.price) {
+      setPurchaseError("Insufficient balance.");
+      return;
+    }
 
-        // Perform purchase logic (this could involve deducting balance on the server and saving the transaction)
-        const response = await axios.post(`http://127.0.0.1:5555/users/${user_id}/purchase`, {
-          product_id: product.id, // Send product ID to purchase
-          price: product.price, // Send product price
-        });
+    try {
+      const user_id = Cookies.get("user_id");
 
-        if (response.status === 200) {
-          // Deduct balance and update state
-          setBalance((prevBalance) => prevBalance - product.price);
+      // Prepare the order details
+      const orderData = {
+        shipping_address: "123 Main St, Anytown, USA", // Dynamic or user-provided
+        payment_method: "mpesa", // Payment method
+        order_items: [
+          {
+            product_id: product.id,
+            quantity: 1,
+            price_at_purchase: product.price,
+          },
+        ],
+      };
+
+      // Check if there's an active order for this user
+      if (!orderId) {
+        const newOrderResponse = await axios.post(
+          `http://127.0.0.1:5555/orders/${user_id}`,
+          orderData,
+          { headers: { "Content-Type": "application/json" } }
+        );
+        if (newOrderResponse.status === 201) {
+          setOrderId(newOrderResponse.data.order_id);
         } else {
-          throw new Error("Purchase failed");
+          throw new Error("Failed to create a new order");
         }
-      } catch (err) {
-        setPurchaseError("An error occurred while processing your purchase.");
+      } else {
+        // Add additional products to the current order
+        const updateOrderResponse = await axios.post(
+          `http://127.0.0.1:5555/orders/${orderId}/items`,
+          {
+            product_id: product.id,
+            quantity: 1,
+            price_at_purchase: product.price,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        if (updateOrderResponse.status !== 201) {
+          throw new Error("Failed to add item to the order");
+        }
       }
-    } else {
-      // Insufficient balance
-      setPurchaseError("Insufficient balance to purchase this product.");
+
+      // Update balance in the backend
+      const newBalance = balance - product.price;
+      const balanceUpdateResponse = await axios.patch(
+        `http://127.0.0.1:5555/users/${user_id}/balance`,
+        { amount: newBalance }, // Correctly pass the new balance
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (balanceUpdateResponse.status === 200) {
+        setBalance(newBalance);
+      } else {
+        throw new Error("Failed to update balance");
+      }
+    } catch (err) {
+      setPurchaseError(err.message);
     }
   };
 
-  // Filter products by category (VIP1, VIP2, VIP3)
+  // Filter products by category
   const categoryLevelMap = {
     1: "VIP1",
     2: "VIP2",
     3: "VIP3",
   };
 
-  const vip1Products = products.filter((product) => categoryLevelMap[product.category_id] === "VIP1");
-  const vip2Products = products.filter((product) => categoryLevelMap[product.category_id] === "VIP2");
-  const vip3Products = products.filter((product) => categoryLevelMap[product.category_id] === "VIP3");
+  const categorizedProducts = {
+    VIP1: products.filter((product) => categoryLevelMap[product.category_id] === "VIP1"),
+    VIP2: products.filter((product) => categoryLevelMap[product.category_id] === "VIP2"),
+    VIP3: products.filter((product) => categoryLevelMap[product.category_id] === "VIP3"),
+  };
 
-  // Display loading state
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>; // Display error if there's an issue
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="product-page">
       <h1>Your Account Balance</h1>
-      <h2>${balance.toFixed(2)}</h2> {/* Display the balance */}
+      <h2>${balance.toFixed(2)}</h2>
 
-      {/* Display purchase error if any */}
       {purchaseError && <div style={{ color: "red" }}>{purchaseError}</div>}
 
-      <h2>VIP1 Products</h2>
-      <div className="product-list">
-        {vip1Products.length > 0 ? (
-          vip1Products.map((product) => (
-            <div key={product.id} className="product-item">
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <p>Price: ${product.price}</p>
-              <button onClick={() => handleBuy(product)}>Buy</button> {/* Add Buy button */}
-            </div>
-          ))
-        ) : (
-          <p>No VIP1 products available.</p>
-        )}
-      </div>
-
-      <h2>VIP2 Products</h2>
-      <div className="product-list">
-        {vip2Products.length > 0 ? (
-          vip2Products.map((product) => (
-            <div key={product.id} className="product-item">
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <p>Price: ${product.price}</p>
-              <button onClick={() => handleBuy(product)}>Buy</button> {/* Add Buy button */}
-            </div>
-          ))
-        ) : (
-          <p>No VIP2 products available.</p>
-        )}
-      </div>
-
-      <h2>VIP3 Products</h2>
-      <div className="product-list">
-        {vip3Products.length > 0 ? (
-          vip3Products.map((product) => (
-            <div key={product.id} className="product-item">
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <p>Price: ${product.price}</p>
-              <button onClick={() => handleBuy(product)}>Buy</button> {/* Add Buy button */}
-            </div>
-          ))
-        ) : (
-          <p>No VIP3 products available.</p>
-        )}
-      </div>
+      {Object.entries(categorizedProducts).map(([category, items]) => (
+        <div key={category}>
+          <h2>{category} Products</h2>
+          <div className="product-list">
+            {items.length > 0 ? (
+              items.map((product) => (
+                <div key={product.id} className="product-item">
+                  <h3>{product.name}</h3>
+                  <p>{product.description}</p>
+                  <p>Price: ${product.price}</p>
+                  <button onClick={() => handleBuy(product)}>Make an Order</button>
+                </div>
+              ))
+            ) : (
+              <p>No {category} products available.</p>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

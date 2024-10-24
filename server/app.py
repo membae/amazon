@@ -91,8 +91,22 @@ def profile():
 # Get all users
 @app.route('/users', methods=['GET'])
 def get_users():
-    users = User.query.all()
-    return jsonify([user.to_dict() for user in users]), 200
+    try:
+        users = User.query.all()  # Query all users
+        user_data = []
+        
+        for user in users:
+            user_info = {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email,
+                'balance': user.balance.amount if user.balance else 0.0  # Access balance amount
+            }
+            user_data.append(user_info)
+
+        return jsonify(user_data), 200  # Return the user data as JSON
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500  # Return an error message if something goes wrong
 
 
 
@@ -161,13 +175,21 @@ def patch_user(user_id):
     if 'email' in data:
         user.email = data['email']
     if 'password' in data:
-        user.password = data['password']  # Add password hashing if necessary
+        user.password = generate_password_hash(data['password'])  # Hash the new password
     if 'address' in data:
         user.address = data['address']
     if 'phone_number' in data:
         user.phone_number = data['phone_number']
     if 'role' in data:
         user.role = data['role']
+    if 'balance' in data:
+        # Assuming balance is a one-to-one relationship with the user
+        if user.balance:
+            user.balance.amount = data['balance']  # Update existing balance
+        else:
+            # Create a new balance entry if it doesn't exist
+            new_balance = Balance(user_id=user.id, amount=data['balance'])
+            db.session.add(new_balance)
 
     db.session.commit()
     return jsonify(user.to_dict()), 200
@@ -253,24 +275,32 @@ def update_user_balance(user_id):
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    balance = user.balance
-    if not balance:
-        return jsonify({'message': 'Balance not found'}), 404
-
     # Get the new amount from the request body
     data = request.get_json()
     if not data or 'amount' not in data:
         return jsonify({'message': 'Amount is required'}), 400
 
     new_amount = data['amount']
-    balance.amount = new_amount  # Update the balance amount
+
+    # Ensure new_amount is a valid number and not negative
+    if not isinstance(new_amount, (int, float)) or new_amount < 0:
+        return jsonify({'message': 'Invalid amount'}), 400
+
+    # Check if the user has a balance entry
+    if user.balance:
+        user.balance.amount = new_amount  # Update the existing balance amount
+    else:
+        # Create a new balance entry if it doesn't exist
+        user.balance = Balance(amount=new_amount, user_id=user.id)
+    
     db.session.commit()
 
     return jsonify({
         'message': 'Balance updated successfully',
         'user_id': user.id,
-        'balance': balance.amount
+        'balance': user.balance.amount  # Use user.balance to get the updated value
     }), 200
+
 
 
 
@@ -473,6 +503,76 @@ def get_order(order_id):
 
 
 # Fetch all orders for the logged-in user
+@app.route('/orders/<int:user_id>', methods=['GET'])
+def get_orders_by_user(user_id):
+    # Query for orders by user_id
+    orders = Order.query.filter_by(user_id=user_id).all()  # Assuming 'user_id' is the foreign key in your Order model
+
+    # Check if orders exist for the user
+    if not orders:
+        return jsonify({"error": "No orders found for this user."}), 404
+
+    # Serialize orders into a list of dictionaries
+    orders_list = [order.to_dict() for order in orders]  # Assuming you have a to_dict method in your Order model
+
+    return jsonify(orders_list), 200
+@app.route('/orders/<int:user_id>', methods=['POST'])
+def create_user_order(user_id):
+    # Check if the user exists
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    # Get the JSON data from the request
+    data = request.get_json()
+
+    # Validate incoming data
+    if 'order_items' not in data or not isinstance(data['order_items'], list):
+        return jsonify({"error": "Missing or invalid order items"}), 400
+
+    # Create a new Order instance
+    new_order = Order(
+        user_id=user.id,
+        total_amount=0,  # This will be calculated based on the order items
+        shipping_address=data.get('shipping_address'),  # Optional field
+        payment_method=data['payment_method'],  # Required field
+    )
+
+    total_amount = 0  # Initialize total amount for the order
+
+    # Loop through order items to create OrderItem instances
+    for item in data['order_items']:
+        if not all(key in item for key in ['product_id', 'quantity', 'price_at_purchase']):
+            return jsonify({"error": "Missing required fields in order items"}), 400
+        
+        # Create an OrderItem instance
+        order_item = OrderItem(
+            order=new_order,  # Set the relationship
+            product_id=item['product_id'],
+            quantity=item['quantity'],
+            price_at_purchase=item['price_at_purchase'],
+            total_price=item['quantity'] * item['price_at_purchase']  # Calculate total price
+        )
+        
+        # Add to the order items list
+        new_order.order_items.append(order_item)
+
+        # Update total amount for the order
+        total_amount += order_item.total_price
+
+    # Set the total amount for the order
+    new_order.total_amount = total_amount
+
+    # Add the new order to the session and commit to the database
+    db.session.add(new_order)
+    db.session.commit()
+
+    return jsonify(new_order.to_dict()), 201  # Return the created order with a 201 status
+
+
+
+
+
 @app.route('/orders', methods=['GET'])
 def get_orders():
     # Get the user ID from the cookies
@@ -587,6 +687,20 @@ def delete_order(order_id):
 # ------------------------------
 # Routes for Order Items
 # ------------------------------
+# Get all orders for a specific user
+@app.route('/users/<int:user_id>/orders', methods=['GET'])
+def get_user_orders(user_id):
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    # Fetch all orders for the user
+    orders = Order.query.filter_by(user_id=user_id).all()
+    if not orders:
+        return jsonify({"message": "No orders found for this user"}), 200
+
+    # Return the list of orders as JSON
+    return jsonify([order.to_dict() for order in orders]), 200
 
 # 1. Get all items for a specific order
 @app.route('/orders/<int:order_id>/items', methods=['GET'])
