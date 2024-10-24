@@ -9,7 +9,7 @@ const fetchUserDetails = async () => {
     if (!user_id) throw new Error("User ID not found in cookies");
 
     const response = await fetch(`http://127.0.0.1:5555/users/${user_id}`, {
-      credentials: "include", // Ensure cookies are included with the request
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -17,7 +17,6 @@ const fetchUserDetails = async () => {
     }
 
     const data = await response.json();
-    console.log("User details fetched successfully:", data);
     return data;
   } catch (err) {
     console.error("Error fetching user details:", err.message);
@@ -32,7 +31,7 @@ const fetchUserOrders = async () => {
     if (!user_id) throw new Error("User ID not found in cookies");
 
     const response = await fetch(`http://127.0.0.1:5555/orders/${user_id}`, {
-      credentials: "include", // Ensure cookies are included with the request
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -40,7 +39,6 @@ const fetchUserOrders = async () => {
     }
 
     const data = await response.json();
-    console.log("User orders fetched successfully:", data);
     return data;
   } catch (err) {
     console.error("Error fetching user orders:", err.message);
@@ -49,66 +47,65 @@ const fetchUserOrders = async () => {
 };
 
 const ProfilePage = () => {
-  // Initialize state from cookies or empty values
   const [user, setUser] = useState({
     name: Cookies.get("user_name") || "",
     email: Cookies.get("user_email") || "",
-    phone_number: Cookies.get("user_phone") || "", // Changed to phone_number
+    phone_number: Cookies.get("user_phone") || "",
     address: Cookies.get("user_address") || "",
   });
 
   const [orders, setOrders] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [viewOrders, setViewOrders] = useState(false);
-  const [updatedUser, setUpdatedUser] = useState(user); // Start with user details from cookies
+  const [updatedUser, setUpdatedUser] = useState(user);
   const [error, setError] = useState("");
+  const [loadingOrders, setLoadingOrders] = useState(false); // New state for loading orders
 
   useEffect(() => {
     // Fetch user details once when the component mounts
     fetchUserDetails()
       .then((userDetails) => {
         setUser(userDetails);
-        setUpdatedUser(userDetails); // Initialize updatedUser with fetched userDetails
-        console.log("User state set:", userDetails);
+        setUpdatedUser(userDetails);
       })
       .catch((err) => {
         setError(err.message);
-        console.error("Error in fetching user details:", err.message);
       });
 
     // Fetch user orders once when the component mounts
-    fetchUserOrders()
-      .then((userOrders) => {
+    const loadUserOrders = async () => {
+      setLoadingOrders(true); // Start loading
+      try {
+        const userOrders = await fetchUserOrders();
         setOrders(userOrders);
-        console.log("Orders state set:", userOrders);
-      })
-      .catch((err) => {
+      } catch (err) {
         setError(err.message);
-        console.error("Error in fetching user orders:", err.message);
-      });
-  }, []); // Empty dependency array ensures this runs only once, when the component mounts
+      } finally {
+        setLoadingOrders(false); // End loading
+      }
+    };
+
+    loadUserOrders(); // Call the function to fetch orders
+  }, []);
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
-    console.log("Edit mode toggled:", !isEditing);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUpdatedUser((prev) => ({ ...prev, [name]: value }));
-    console.log(`Field '${name}' updated to:`, value);
   };
 
   const handleSave = async () => {
     try {
       const response = await axios.patch(
         `http://127.0.0.1:5555/users/${user.id}`,
-        updatedUser,  // Only send the updated fields
+        updatedUser,
         {
-          withCredentials: true, // Ensure cookies are included with the request
+          withCredentials: true,
         }
       );
-      console.log("Updated user details:", response.data);
       setUser(updatedUser);
       setIsEditing(false);
     } catch (error) {
@@ -123,7 +120,7 @@ const ProfilePage = () => {
         "http://127.0.0.1:5555/logout",
         {},
         {
-          withCredentials: true, // Ensure cookies are included with the request
+          withCredentials: true,
         }
       );
       // Clear cookies on sign out
@@ -132,7 +129,6 @@ const ProfilePage = () => {
       Cookies.remove("user_email");
       Cookies.remove("user_phone");
       Cookies.remove("user_address");
-      console.log("User signed out, cookies cleared");
       alert("Logout successful!");
       window.location.href = "/login";
     } catch (error) {
@@ -147,7 +143,6 @@ const ProfilePage = () => {
 
   const toggleOrders = () => {
     setViewOrders(!viewOrders);
-    console.log("Orders view toggled:", !viewOrders);
   };
 
   return (
@@ -195,7 +190,7 @@ const ProfilePage = () => {
                 <label>Phone:</label>
                 <input
                   type="tel"
-                  name="phone_number" // Changed to phone_number
+                  name="phone_number"
                   value={updatedUser.phone_number || ""}
                   onChange={handleChange}
                 />
@@ -229,7 +224,7 @@ const ProfilePage = () => {
 
               <div>
                 <label>Phone:</label>
-                <span>{user.phone_number}</span> {/* Changed to phone_number */}
+                <span>{user.phone_number}</span>
               </div>
 
               <div>
@@ -245,7 +240,9 @@ const ProfilePage = () => {
       {viewOrders && (
         <div className="orders-section">
           <h2>Your Orders</h2>
-          {orders.length > 0 ? (
+          {loadingOrders ? (
+            <p>Loading orders...</p> // Loading state
+          ) : orders.length > 0 ? (
             <ul className="orders-list">
               {orders.map((order) => (
                 <li key={order.id}>
@@ -256,7 +253,7 @@ const ProfilePage = () => {
               ))}
             </ul>
           ) : (
-            <p>No orders found.</p>
+            <p>No orders found.</p> // No orders case
           )}
         </div>
       )}

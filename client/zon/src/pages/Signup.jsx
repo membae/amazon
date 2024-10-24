@@ -52,7 +52,7 @@ const Signup = () => {
                 Cookies.set('token', token); // Save token in cookies if needed
             }
 
-            navigate('/'); // Redirect to sign-in page
+            navigate('/login'); // Redirect to sign-in page
         } catch (error) {
             setErrorMessage(error.response.data.message || 'Error registering. Please try again.');
         }
