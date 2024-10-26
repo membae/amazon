@@ -3,15 +3,33 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 // Component for payment options
-const PaymentOptions = ({ onSelect }) => {
+const PaymentOptions = ({ onSelect, paymentMethod, onUploadMessage }) => {
   return (
     <div className="payment-options">
       <h3>Select a Payment Method</h3>
       <button onClick={() => onSelect("M-Pesa")}>M-Pesa</button>
       <button onClick={() => onSelect("Crypto")}>Crypto</button>
+
+      {paymentMethod === "M-Pesa" && (
+        <div>
+          <p>Pay to: <strong>0123456789</strong></p>
+          <textarea
+            placeholder="Upload M-Pesa message"
+            onChange={(e) => onUploadMessage(e.target.value)}
+            rows="4"
+            cols="50"
+          />
+        </div>
+      )}
+
+      {paymentMethod === "Crypto" && (
+        <div>
+          <p>Pay to Crypto Wallet Address: <strong>1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</strong></p>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 function BalancePage() {
   const [balance, setBalance] = useState(0); // Initialize balance to 0
@@ -20,6 +38,8 @@ function BalancePage() {
   const [error, setError] = useState("");
   const [notification, setNotification] = useState(""); // State for notifications
   const [showPaymentOptions, setShowPaymentOptions] = useState(false); // State to toggle payment options
+  const [paymentMethod, setPaymentMethod] = useState(""); // State to hold selected payment method
+  const [mpesaMessage, setMpesaMessage] = useState(""); // State to hold M-Pesa message
 
   // Fetch the balance for the currently logged-in user
   useEffect(() => {
@@ -57,12 +77,15 @@ function BalancePage() {
         const user_id = Cookies.get("user_id");
         const response = await axios.post(`http://127.0.0.1:5555/users/${user_id}/recharge`, {
           amount: rechargeAmount,
+          paymentMethod: paymentMethod,
+          mpesaMessage: mpesaMessage, // Include M-Pesa message in the request if applicable
         }, { withCredentials: true });
 
         if (response.status === 200) {
           setBalance((prevBalance) => prevBalance + parseFloat(rechargeAmount));
           setNotification(`Successfully recharged $${rechargeAmount}`);
           setRechargeAmount(0);
+          setShowPaymentOptions(false); // Hide payment options after recharge
         } else {
           throw new Error("Failed to recharge balance");
         }
@@ -72,7 +95,6 @@ function BalancePage() {
     };
 
     rechargeBalance();
-    setShowPaymentOptions(false); // Hide payment options after recharge
   };
 
   const handleWithdraw = () => {
@@ -124,7 +146,16 @@ function BalancePage() {
           placeholder="Enter amount to recharge"
         />
         <button onClick={() => setShowPaymentOptions(true)}>Choose Payment Method</button> {/* Button to show payment options */}
-        {showPaymentOptions && <PaymentOptions onSelect={handleRecharge} />}
+        {showPaymentOptions && (
+          <PaymentOptions
+            onSelect={(method) => {
+              setPaymentMethod(method);
+              setShowPaymentOptions(true);
+            }}
+            paymentMethod={paymentMethod}
+            onUploadMessage={setMpesaMessage} // Callback to set the M-Pesa message
+          />
+        )}
       </div>
 
       <div className="withdraw-section">

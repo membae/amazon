@@ -14,7 +14,7 @@ function ProductPage() {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const user_id = Cookies.get("user_id");
+        const user_id = Cookies.get("user_id"); // Retrieve user_id here
         if (!user_id) throw new Error("User ID not found");
 
         const response = await axios.get(`http://127.0.0.1:5555/users/${user_id}/balance`, {
@@ -27,7 +27,22 @@ function ProductPage() {
           throw new Error("Failed to fetch balance");
         }
       } catch (err) {
-        setError(err.message);
+        if (err.response && err.response.status === 404) {
+          // Set balance to 0 if no balance is found for a new user
+          setBalance(0);
+
+          // Attempt to initialize balance in the backend
+          try {
+            const user_id = Cookies.get("user_id"); // Add user_id here as well
+            await axios.post(`http://127.0.0.1:5555/users/${user_id}/initialize-balance`, { amount: 0 });
+          } catch (initializeError) {
+            console.error("Failed to initialize balance:", initializeError);
+          }
+        } else {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -47,7 +62,7 @@ function ProductPage() {
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoading(false); // Set loading to false regardless of success or failure
+        setLoading(false);
       }
     };
 
@@ -68,8 +83,8 @@ function ProductPage() {
 
       // Prepare the order details
       const orderData = {
-        shipping_address: "123 Main St, Anytown, USA", // Dynamic or user-provided
-        payment_method: "mpesa", // Payment method
+        shipping_address: "123 Main St, Anytown, USA",
+        payment_method: "mpesa",
         order_items: [
           {
             product_id: product.id,
@@ -112,7 +127,7 @@ function ProductPage() {
       const newBalance = balance - product.price;
       const balanceUpdateResponse = await axios.patch(
         `http://127.0.0.1:5555/users/${user_id}/balance`,
-        { amount: newBalance }, // Correctly pass the new balance
+        { amount: newBalance },
         { headers: { "Content-Type": "application/json" } }
       );
 
