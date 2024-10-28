@@ -2,6 +2,7 @@
 
 from app import app
 from models import db, User, Balance, Category, Product, Order, OrderItem, Payment, ShoppingCart, Review
+import random
 
 with app.app_context():
 
@@ -30,19 +31,40 @@ with app.app_context():
 
     # VIP1 products (cheapest)
     vip1_products = [
-        Product(name=f"VIP1 Product {i}", description=f"Affordable VIP1 product {i}", price=10.99 + i, stock=100, category=category1)
+        Product(
+            name=f"VIP1 Product {i}",
+            description=f"Affordable VIP1 product {i}",
+            price=10.99 + i,
+            stock=100,
+            category=category1,
+            commission=random.uniform(0.1, 0.5)  # Random commission between 10% and 50%
+        )
         for i in range(1, 11)
     ]
 
     # VIP2 products (mid-range)
     vip2_products = [
-        Product(name=f"VIP2 Product {i}", description=f"Mid-range VIP2 product {i}", price=50.99 + i * 2, stock=50, category=category2)
+        Product(
+            name=f"VIP2 Product {i}",
+            description=f"Mid-range VIP2 product {i}",
+            price=50.99 + i * 2,
+            stock=50,
+            category=category2,
+            commission=random.uniform(0.1, 0.5)  # Random commission between 10% and 50%
+        )
         for i in range(1, 11)
     ]
 
     # VIP3 products (expensive)
     vip3_products = [
-        Product(name=f"VIP3 Product {i}", description=f"Premium VIP3 product {i}", price=500.99 + i * 10, stock=10, category=category3)
+        Product(
+            name=f"VIP3 Product {i}",
+            description=f"Premium VIP3 product {i}",
+            price=500.99 + i * 10,
+            stock=10,
+            category=category3,
+            commission=random.uniform(0.1, 0.5)  # Random commission between 10% and 50%
+        )
         for i in range(1, 11)
     ]
 
@@ -83,7 +105,7 @@ with app.app_context():
     db.session.add_all(payments)
     db.session.add_all(shopping_cart_items)
     db.session.add_all(reviews)
-    
+
     # Commit the session to save all data to the database
     db.session.commit()
 

@@ -1,8 +1,8 @@
-"""added balance column
+"""added commision column
 
-Revision ID: 31145e005a49
+Revision ID: 03a8823c5bee
 Revises: 
-Create Date: 2024-10-23 09:05:00.625063
+Create Date: 2024-10-26 21:34:46.004941
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '31145e005a49'
+revision = '03a8823c5bee'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -65,6 +65,7 @@ def upgrade():
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('brand', sa.String(length=100), nullable=True),
     sa.Column('image_url', sa.String(length=255), nullable=True),
+    sa.Column('commission', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], name=op.f('fk_products_category_id_categories')),
     sa.PrimaryKeyConstraint('id')
     )

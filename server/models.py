@@ -55,9 +55,10 @@ class Category(db.Model, SerializerMixin):
     products = db.relationship('Product', back_populates='category', lazy=True)
 
 # Products Table
+# Products Table
 class Product(db.Model, SerializerMixin):
     __tablename__ = 'products'
-    serialize_only = ('id', 'name', 'description', 'price', 'stock', 'category_id', 'brand', 'image_url')  # Fields to serialize
+    serialize_only = ('id', 'name', 'description', 'price', 'stock', 'category_id', 'brand', 'image_url', 'commission')  # Include 'commission' for serialization
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -67,6 +68,7 @@ class Product(db.Model, SerializerMixin):
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     brand = db.Column(db.String(100), nullable=True)
     image_url = db.Column(db.String(255), nullable=True)
+    commission = db.Column(db.Float, nullable=False, default=0.0)  # New commission column
 
     category = db.relationship('Category', back_populates='products')
     order_items = db.relationship('OrderItem', back_populates='product', lazy=True)

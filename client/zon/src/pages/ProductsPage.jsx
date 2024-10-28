@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 
 function ProductPage() {
   const [balance, setBalance] = useState(0);
+  const [totalEarnings, setTotalEarnings] = useState(0); // New state for total earnings
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -23,6 +24,7 @@ function ProductPage() {
 
         if (response.status === 200) {
           setBalance(response.data.balance);
+          setTotalEarnings(response.data.balance); // Initialize total earnings with the fetched balance
         } else {
           throw new Error("Failed to fetch balance");
         }
@@ -30,6 +32,7 @@ function ProductPage() {
         if (err.response && err.response.status === 404) {
           // Set balance to 0 if no balance is found for a new user
           setBalance(0);
+          setTotalEarnings(0); // Set total earnings to 0 for new users
 
           // Attempt to initialize balance in the backend
           try {
@@ -49,7 +52,7 @@ function ProductPage() {
     fetchBalance();
   }, []);
 
-  // Fetch products from the backend
+  // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -73,7 +76,10 @@ function ProductPage() {
   const handleBuy = async (product) => {
     setPurchaseError("");
 
-    if (balance < product.price) {
+    const commissionAmount = product.price * product.commission;
+    const totalCost = product.price - commissionAmount;
+
+    if (balance < totalCost) {
       setPurchaseError("Insufficient balance.");
       return;
     }
@@ -81,20 +87,19 @@ function ProductPage() {
     try {
       const user_id = Cookies.get("user_id");
 
-      // Prepare the order details
       const orderData = {
-        shipping_address: "123 Main St, Anytown, USA",
+        shipping_address: "123 Main St, Anytown, USA", // Replace with user-provided address
         payment_method: "mpesa",
         order_items: [
           {
             product_id: product.id,
             quantity: 1,
             price_at_purchase: product.price,
+            commission: commissionAmount,
           },
         ],
       };
 
-      // Check if there's an active order for this user
       if (!orderId) {
         const newOrderResponse = await axios.post(
           `http://127.0.0.1:5555/orders/${user_id}`,
@@ -107,13 +112,13 @@ function ProductPage() {
           throw new Error("Failed to create a new order");
         }
       } else {
-        // Add additional products to the current order
         const updateOrderResponse = await axios.post(
           `http://127.0.0.1:5555/orders/${orderId}/items`,
           {
             product_id: product.id,
             quantity: 1,
             price_at_purchase: product.price,
+            commission: commissionAmount,
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -123,8 +128,7 @@ function ProductPage() {
         }
       }
 
-      // Update balance in the backend
-      const newBalance = balance - product.price;
+      const newBalance = balance - totalCost;
       const balanceUpdateResponse = await axios.patch(
         `http://127.0.0.1:5555/users/${user_id}/balance`,
         { amount: newBalance },
@@ -133,6 +137,7 @@ function ProductPage() {
 
       if (balanceUpdateResponse.status === 200) {
         setBalance(newBalance);
+        setTotalEarnings((prevEarnings) => prevEarnings + commissionAmount); // Update total earnings
       } else {
         throw new Error("Failed to update balance");
       }
@@ -141,7 +146,6 @@ function ProductPage() {
     }
   };
 
-  // Filter products by category
   const categoryLevelMap = {
     1: "VIP1",
     2: "VIP2",
@@ -161,6 +165,7 @@ function ProductPage() {
     <div className="product-page">
       <h1>Your Account Balance</h1>
       <h2>${balance.toFixed(2)}</h2>
+      <h2>Total Earnings: ${totalEarnings.toFixed(2)}</h2> {/* Display total earnings */}
 
       {purchaseError && <div style={{ color: "red" }}>{purchaseError}</div>}
 
@@ -174,6 +179,7 @@ function ProductPage() {
                   <h3>{product.name}</h3>
                   <p>{product.description}</p>
                   <p>Price: ${product.price}</p>
+                  <p>Commission: ${(product.price * product.commission).toFixed(2)}</p>
                   <button onClick={() => handleBuy(product)}>Make an Order</button>
                 </div>
               ))
