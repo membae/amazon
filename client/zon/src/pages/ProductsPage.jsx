@@ -4,7 +4,9 @@ import Cookies from "js-cookie";
 
 function ProductPage() {
   const [balance, setBalance] = useState(0);
-  const [totalEarnings, setTotalEarnings] = useState(0); // New state for total earnings
+  const [totalEarnings, setTotalEarnings] = useState(
+    parseFloat(localStorage.getItem("totalEarnings")) || 0
+  ); // Initialize from localStorage
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,7 +17,7 @@ function ProductPage() {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const user_id = Cookies.get("user_id"); // Retrieve user_id here
+        const user_id = Cookies.get("user_id");
         if (!user_id) throw new Error("User ID not found");
 
         const response = await axios.get(`http://127.0.0.1:5555/users/${user_id}/balance`, {
@@ -24,19 +26,20 @@ function ProductPage() {
 
         if (response.status === 200) {
           setBalance(response.data.balance);
-          setTotalEarnings(response.data.balance); // Initialize total earnings with the fetched balance
+          if (totalEarnings === 0) {
+            // Initialize total earnings only if not set
+            setTotalEarnings(response.data.balance);
+          }
         } else {
           throw new Error("Failed to fetch balance");
         }
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          // Set balance to 0 if no balance is found for a new user
           setBalance(0);
-          setTotalEarnings(0); // Set total earnings to 0 for new users
+          setTotalEarnings(0);
 
-          // Attempt to initialize balance in the backend
           try {
-            const user_id = Cookies.get("user_id"); // Add user_id here as well
+            const user_id = Cookies.get("user_id");
             await axios.post(`http://127.0.0.1:5555/users/${user_id}/initialize-balance`, { amount: 0 });
           } catch (initializeError) {
             console.error("Failed to initialize balance:", initializeError);
@@ -51,6 +54,11 @@ function ProductPage() {
 
     fetchBalance();
   }, []);
+
+  // Save totalEarnings to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("totalEarnings", totalEarnings.toFixed(2));
+  }, [totalEarnings]);
 
   // Fetch products from backend
   useEffect(() => {
@@ -137,7 +145,7 @@ function ProductPage() {
 
       if (balanceUpdateResponse.status === 200) {
         setBalance(newBalance);
-        setTotalEarnings((prevEarnings) => prevEarnings + commissionAmount); // Update total earnings
+        setTotalEarnings((prevEarnings) => prevEarnings + commissionAmount);
       } else {
         throw new Error("Failed to update balance");
       }
@@ -165,7 +173,7 @@ function ProductPage() {
     <div className="product-page">
       <h1>Your Account Balance</h1>
       <h2>${balance.toFixed(2)}</h2>
-      <h2>Total Earnings: ${totalEarnings.toFixed(2)}</h2> {/* Display total earnings */}
+      <h2>Total Earnings: ${totalEarnings.toFixed(2)}</h2>
 
       {purchaseError && <div style={{ color: "red" }}>{purchaseError}</div>}
 

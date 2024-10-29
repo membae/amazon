@@ -24,7 +24,7 @@ const fetchUserDetails = async () => {
   }
 };
 
-// Function to fetch user orders using cookies
+// Function to fetch user orders
 const fetchUserOrders = async () => {
   try {
     const user_id = Cookies.get("user_id");
@@ -47,45 +47,52 @@ const fetchUserOrders = async () => {
 };
 
 const ProfilePage = () => {
-  const [user, setUser] = useState({
-    name: Cookies.get("user_name") || "",
-    email: Cookies.get("user_email") || "",
-    phone_number: Cookies.get("user_phone") || "",
-    address: Cookies.get("user_address") || "",
-  });
-
+  const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [viewOrders, setViewOrders] = useState(false);
-  const [updatedUser, setUpdatedUser] = useState(user);
   const [error, setError] = useState("");
-  const [loadingOrders, setLoadingOrders] = useState(false); // New state for loading orders
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true); // Loading state for user
+  const [balance, setBalance] = useState(0); // Balance state
 
   useEffect(() => {
-    // Fetch user details once when the component mounts
-    fetchUserDetails()
-      .then((userDetails) => {
+    const loadUserData = async () => {
+      setLoadingUser(true);
+      try {
+        const userDetails = await fetchUserDetails();
         setUser(userDetails);
-        setUpdatedUser(userDetails);
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
 
-    // Fetch user orders once when the component mounts
+        // Fetch user balance
+        const balanceResponse = await axios.get(
+          `http://127.0.0.1:5555/users/${userDetails.id}/balance`,
+          { withCredentials: true }
+        );
+        setBalance(balanceResponse.data.balance);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
+  useEffect(() => {
     const loadUserOrders = async () => {
-      setLoadingOrders(true); // Start loading
+      setLoadingOrders(true);
       try {
         const userOrders = await fetchUserOrders();
         setOrders(userOrders);
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoadingOrders(false); // End loading
+        setLoadingOrders(false);
       }
     };
 
-    loadUserOrders(); // Call the function to fetch orders
+    loadUserOrders();
   }, []);
 
   const handleEditToggle = () => {
@@ -94,19 +101,18 @@ const ProfilePage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setUpdatedUser((prev) => ({ ...prev, [name]: value }));
+    setUser((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `http://127.0.0.1:5555/users/${user.id}`,
-        updatedUser,
+        user,
         {
           withCredentials: true,
         }
       );
-      setUser(updatedUser);
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating user details:", error);
@@ -123,12 +129,7 @@ const ProfilePage = () => {
           withCredentials: true,
         }
       );
-      // Clear cookies on sign out
       Cookies.remove("user_id");
-      Cookies.remove("user_name");
-      Cookies.remove("user_email");
-      Cookies.remove("user_phone");
-      Cookies.remove("user_address");
       alert("Logout successful!");
       window.location.href = "/login";
     } catch (error) {
@@ -137,111 +138,91 @@ const ProfilePage = () => {
     }
   };
 
-  const handleSwitchAccount = () => {
-    console.log("Switching account");
-  };
-
   const toggleOrders = () => {
     setViewOrders(!viewOrders);
   };
 
+  if (loadingUser) {
+    return <p>Loading user details...</p>;
+  }
+
   return (
     <div className="profile-page">
       <h1>User Profile</h1>
+      <h2>Balance: ${balance.toFixed(2)}</h2>
 
-      {/* Buttons for various actions */}
       <div className="action-buttons">
-        <button onClick={handleSwitchAccount}>Switch Account</button>
         <button onClick={handleSignOut}>Sign Out</button>
         <button onClick={toggleOrders}>
           {viewOrders ? "Hide Orders" : "Your Orders"}
         </button>
         <button onClick={handleEditToggle}>
-          {isEditing ? "Cancel" : "Profile Details"}
+          {isEditing ? "Cancel" : "Edit Profile"}
         </button>
       </div>
 
-      {/* Display user details or edit form */}
-      {!viewOrders && (
-        <div className="profile-details">
-          {isEditing ? (
+      <div className="profile-details">
+        {isEditing ? (
+          <>
+            <label>Name:</label>
+            <input
+              type="text"
+              name="name"
+              value={user.name || ""}
+              onChange={handleChange}
+            />
+            <label>Email:</label>
+            <input
+              type="email"
+              name="email"
+              value={user.email || ""}
+              onChange={handleChange}
+            />
+            <label>Phone:</label>
+            <input
+              type="tel"
+              name="phone_number"
+              value={user.phone_number || ""}
+              onChange={handleChange}
+            />
+            <label>Address:</label>
+            <input
+              type="text"
+              name="address"
+              value={user.address || ""}
+              onChange={handleChange}
+            />
+            <button onClick={handleSave} className="save-button">
+              Save
+            </button>
+          </>
+        ) : (
+          <>
             <div>
-              <div>
-                <label>Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={updatedUser.name || ""}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label>Email:</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={updatedUser.email || ""}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label>Phone:</label>
-                <input
-                  type="tel"
-                  name="phone_number"
-                  value={updatedUser.phone_number || ""}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label>Address:</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={updatedUser.address || ""}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <button onClick={handleSave} className="save-button">
-                Save
-              </button>
+              <label>Name:</label>
+              <span>{user.name}</span>
             </div>
-          ) : (
             <div>
-              <div>
-                <label>Name:</label>
-                <span>{user.name}</span>
-              </div>
-
-              <div>
-                <label>Email:</label>
-                <span>{user.email}</span>
-              </div>
-
-              <div>
-                <label>Phone:</label>
-                <span>{user.phone_number}</span>
-              </div>
-
-              <div>
-                <label>Address:</label>
-                <span>{user.address}</span>
-              </div>
+              <label>Email:</label>
+              <span>{user.email}</span>
             </div>
-          )}
-        </div>
-      )}
+            <div>
+              <label>Phone:</label>
+              <span>{user.phone_number}</span>
+            </div>
+            <div>
+              <label>Address:</label>
+              <span>{user.address}</span>
+            </div>
+          </>
+        )}
+      </div>
 
-      {/* Display user's orders if 'Your Orders' is clicked */}
       {viewOrders && (
         <div className="orders-section">
           <h2>Your Orders</h2>
           {loadingOrders ? (
-            <p>Loading orders...</p> // Loading state
+            <p>Loading orders...</p>
           ) : orders.length > 0 ? (
             <ul className="orders-list">
               {orders.map((order) => (
@@ -253,12 +234,11 @@ const ProfilePage = () => {
               ))}
             </ul>
           ) : (
-            <p>No orders found.</p> // No orders case
+            <p>No orders found.</p>
           )}
         </div>
       )}
 
-      {/* Show error if any */}
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );

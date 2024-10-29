@@ -301,6 +301,32 @@ def update_user_balance(user_id):
         'balance': user.balance.amount  # Use user.balance to get the updated value
     }), 200
 
+# @app.route('/users/<int:user_id>/update-earnings', methods=['PATCH'])
+# def update_earnings(user_id):
+#     user = User.query.get(user_id)
+#     if not user:
+#         return jsonify({"message": "User not found"}), 404
+
+#     commission_amount = request.json.get('commission_amount', 0.0)
+#     user.total_earnings += commission_amount  # Update the earnings
+    
+#     db.session.commit()  # Save changes to the database
+#     return jsonify({"total_earnings": user.total_earnings}), 200
+@app.route('/users/<int:user_id>/update-earnings', methods=['PATCH'])
+def update_earnings(user_id):
+    data = request.get_json()
+    total_earnings = data.get('total_earnings')
+
+    # Fetch the user from the database
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    # Update the user's total earnings
+    user.total_earnings = total_earnings
+    db.session.commit()
+
+    return jsonify({'message': 'Total earnings updated successfully'}), 200
 
 
 

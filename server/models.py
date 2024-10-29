@@ -21,6 +21,7 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.String(200), nullable=False)
     address = db.Column(db.String(200), nullable=True)
     phone_number = db.Column(db.String(15), nullable=True)
+    total_earnings = db.Column(db.Float, default=0.0) 
     # balance = db.Column(db.Float, default=0.0)
     role = db.Column(db.String(50), nullable=False, default='customer')  # 'admin' or 'customer'
 

@@ -1,8 +1,8 @@
-"""added commision column
+"""addedtotal earnings to user 
 
-Revision ID: 03a8823c5bee
+Revision ID: 7fc71c90bc5d
 Revises: 
-Create Date: 2024-10-26 21:34:46.004941
+Create Date: 2024-10-28 10:48:41.003916
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '03a8823c5bee'
+revision = '7fc71c90bc5d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,6 +34,7 @@ def upgrade():
     sa.Column('password', sa.String(length=200), nullable=False),
     sa.Column('address', sa.String(length=200), nullable=True),
     sa.Column('phone_number', sa.String(length=15), nullable=True),
+    sa.Column('total_earnings', sa.Float(), nullable=True),
     sa.Column('role', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
