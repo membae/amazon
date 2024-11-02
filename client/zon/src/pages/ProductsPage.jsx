@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import VIP1 from "../assets/productsImages/V1P1.jpeg"; // VIP1 Product 1 image
+import VIP2 from "../assets/productsImages/V1P2.jpeg"; // VIP1 Product 2 image
+import VIP3 from "../assets/productsImages/V1P3.jpeg"; // VIP1 Product 3 image
+import VIP4 from "../assets/productsImages/V1P4.jpeg"; // VIP1 Product 4 image
+import VIP5 from "../assets/productsImages/V1P5.jpeg"; // VIP1 Product 5 image
 
 function ProductPage() {
   const [balance, setBalance] = useState(0);
@@ -166,7 +171,6 @@ function ProductPage() {
       setPurchaseError(err.message);
     }
   };
-  
 
   const categoryLevelMap = {
     1: "VIP1",
@@ -178,6 +182,24 @@ function ProductPage() {
     VIP1: products.filter((product) => categoryLevelMap[product.category_id] === "VIP1"),
     VIP2: products.filter((product) => categoryLevelMap[product.category_id] === "VIP2"),
     VIP3: products.filter((product) => categoryLevelMap[product.category_id] === "VIP3"),
+  };
+
+  // Function to get the background image
+  const getBackgroundImage = (product) => {
+    switch (product.name) {
+      case "VIP1 Product 1":
+        return `url(${VIP1})`;
+      case "VIP1 Product 2":
+        return `url(${VIP2})`;
+      case "VIP1 Product 3":
+        return `url(${VIP3})`;
+      case "VIP1 Product 4":
+        return `url(${VIP4})`;
+      case "VIP1 Product 5":
+        return `url(${VIP5})`;
+      default:
+        return `url(${product.imageUrl})`;
+    }
   };
 
   if (loading) return <div>Loading...</div>;
@@ -192,39 +214,38 @@ function ProductPage() {
       {purchaseError && <div style={{ color: "red" }}>{purchaseError}</div>}
 
       {Object.entries(categorizedProducts).map(([category, items]) => (
-  <div key={category}>
-    <h2>{category} Products</h2>
-    <div className="product-list">
-      {items.length > 0 ? (
-        items.map((product) => (
-          <div
-            key={product.id}
-            className="product-item"
-            style={{
-              backgroundImage: `url(${product.imageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              height: '200px', // Set a fixed height for the product box
-              color: 'white', // Adjust text color for readability
-              padding: '10px',
-              borderRadius: '5px',
-              marginBottom: '20px',
-            }}
-          >
-            <h3>{product.name}</h3>
-            <p>{product.description}</p>
-            <p>Price: ${product.price}</p>
-            <p>Commission: ${(product.price * product.commission).toFixed(2)}</p>
-            <button onClick={() => handleBuy(product)}>Make an Order</button>
+        <div key={category}>
+          <h2>{category} Products</h2>
+          <div className="product-list">
+            {items.length > 0 ? (
+              items.map((product) => (
+                <div
+                  key={product.id}
+                  className="product-item"
+                  style={{
+                    backgroundImage: getBackgroundImage(product), // Call the function to get the background image
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    height: '200px', // Set a fixed height for the product box
+                    color: 'white', // Adjust text color for readability
+                    padding: '10px',
+                    borderRadius: '5px',
+                    marginBottom: '20px',
+                  }}
+                >
+                  <h3>{product.name}</h3>
+                  <p>{product.description}</p>
+                  <p>Price: ${product.price}</p>
+                  <p>Commission: ${(product.price * product.commission).toFixed(2)}</p>
+                  <button onClick={() => handleBuy(product)}>Make an Order</button>
+                </div>
+              ))
+            ) : (
+              <p>No {category} products available.</p>
+            )}
           </div>
-        ))
-      ) : (
-        <p>No {category} products available.</p>
-      )}
-    </div>
-  </div>
-))}
-
+        </div>
+      ))}
     </div>
   );
 }
