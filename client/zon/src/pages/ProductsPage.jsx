@@ -192,25 +192,39 @@ function ProductPage() {
       {purchaseError && <div style={{ color: "red" }}>{purchaseError}</div>}
 
       {Object.entries(categorizedProducts).map(([category, items]) => (
-        <div key={category}>
-          <h2>{category} Products</h2>
-          <div className="product-list">
-            {items.length > 0 ? (
-              items.map((product) => (
-                <div key={product.id} className="product-item">
-                  <h3>{product.name}</h3>
-                  <p>{product.description}</p>
-                  <p>Price: ${product.price}</p>
-                  <p>Commission: ${(product.price * product.commission).toFixed(2)}</p>
-                  <button onClick={() => handleBuy(product)}>Make an Order</button>
-                </div>
-              ))
-            ) : (
-              <p>No {category} products available.</p>
-            )}
+  <div key={category}>
+    <h2>{category} Products</h2>
+    <div className="product-list">
+      {items.length > 0 ? (
+        items.map((product) => (
+          <div
+            key={product.id}
+            className="product-item"
+            style={{
+              backgroundImage: `url(${product.imageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              height: '200px', // Set a fixed height for the product box
+              color: 'white', // Adjust text color for readability
+              padding: '10px',
+              borderRadius: '5px',
+              marginBottom: '20px',
+            }}
+          >
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            <p>Price: ${product.price}</p>
+            <p>Commission: ${(product.price * product.commission).toFixed(2)}</p>
+            <button onClick={() => handleBuy(product)}>Make an Order</button>
           </div>
-        </div>
-      ))}
+        ))
+      ) : (
+        <p>No {category} products available.</p>
+      )}
+    </div>
+  </div>
+))}
+
     </div>
   );
 }

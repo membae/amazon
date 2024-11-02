@@ -463,7 +463,9 @@ def create_product():
         name=data['name'],
         description=data.get('description', ''),  # Optional
         price=data['price'],
-        category_id=data['category_id']  # Assuming it has a foreign key relationship with Category
+        stock=data['stock'],
+        category_id=data['category_id'],
+        commission=data['commission']  # Assuming it has a foreign key relationship with Category
     )
     
     db.session.add(new_product)
@@ -488,7 +490,9 @@ def edit_product(product_id):
         product.price = data['price']
     if 'category_id' in data:
         product.category_id = data['category_id']
-    
+    if 'commission' in data:
+        product.commission = data['commission']
+
     db.session.commit()
     return jsonify(product.to_dict()), 200
 
@@ -509,6 +513,8 @@ def patch_product(product_id):
         product.price = data['price']
     if 'category_id' in data:
         product.category_id = data['category_id']
+    if 'commission' in data:
+        product.commission = data['commission']
 
     db.session.commit()
     return jsonify(product.to_dict()), 200
