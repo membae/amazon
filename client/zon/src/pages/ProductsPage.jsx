@@ -65,6 +65,7 @@ function ProductPage() {
     const fetchProducts = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:5555/products");
+        console.log(response.data);
         if (response.status === 200) {
           setProducts(response.data);
         } else {
@@ -83,18 +84,18 @@ function ProductPage() {
   // Handle product purchase
   const handleBuy = async (product) => {
     setPurchaseError("");
-
+  
     const commissionAmount = product.price * product.commission;
     const totalCost = product.price - commissionAmount;
-
+  
     if (balance < totalCost) {
       setPurchaseError("Insufficient balance.");
       return;
     }
-
+  
     try {
       const user_id = Cookies.get("user_id");
-
+  
       const orderData = {
         shipping_address: "123 Main St, Anytown, USA", // Replace with user-provided address
         payment_method: "mpesa",
@@ -107,7 +108,7 @@ function ProductPage() {
           },
         ],
       };
-
+  
       if (!orderId) {
         const newOrderResponse = await axios.post(
           `http://127.0.0.1:5555/orders/${user_id}`,
@@ -130,22 +131,34 @@ function ProductPage() {
           },
           { headers: { "Content-Type": "application/json" } }
         );
-
+  
         if (updateOrderResponse.status !== 201) {
           throw new Error("Failed to add item to the order");
         }
       }
-
+  
       const newBalance = balance - totalCost;
       const balanceUpdateResponse = await axios.patch(
         `http://127.0.0.1:5555/users/${user_id}/balance`,
         { amount: newBalance },
         { headers: { "Content-Type": "application/json" } }
       );
-
+  
       if (balanceUpdateResponse.status === 200) {
         setBalance(newBalance);
-        setTotalEarnings((prevEarnings) => prevEarnings + commissionAmount);
+  
+        // Update total earnings in the database with commission amount
+        const earningsUpdateResponse = await axios.patch(
+          `http://127.0.0.1:5555/users/${user_id}/update-earnings`,
+          { commission: commissionAmount },
+          { headers: { "Content-Type": "application/json" } }
+        );
+  
+        if (earningsUpdateResponse.status === 200) {
+          setTotalEarnings(earningsUpdateResponse.data.total_earnings);
+        } else {
+          throw new Error("Failed to update total earnings in the database");
+        }
       } else {
         throw new Error("Failed to update balance");
       }
@@ -153,6 +166,7 @@ function ProductPage() {
       setPurchaseError(err.message);
     }
   };
+  
 
   const categoryLevelMap = {
     1: "VIP1",

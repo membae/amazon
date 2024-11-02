@@ -36,9 +36,10 @@ h2 {
 .product-list {
   display: flex;
   white-space: nowrap; /* Ensure items don't wrap to the next row */
-  overflow: hidden;
-  animation: scroll-left 100s linear infinite; /* Animation for scrolling */
+  overflow-x: auto; /* Allow horizontal scrolling instead of moving */
+  padding: 10px 0; /* Add padding for better spacing */
 }
+
 
 .product-item {
   background-color: #fff;

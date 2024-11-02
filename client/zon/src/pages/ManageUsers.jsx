@@ -2,62 +2,68 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function ManageUsers() {
-  const [users, setUsers] = useState([]); // State to hold user data
-  const [loading, setLoading] = useState(true); // State to track loading status
-  const [error, setError] = useState(""); // State to hold error messages
-  const [editingUserId, setEditingUserId] = useState(null); // State to track the user being edited
-  const [updatedUser, setUpdatedUser] = useState({ name: '', email: '', balance: 0 }); // State for updated user data
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [updatedUser, setUpdatedUser] = useState({ name: '', email: '', balance: 0, total_earnings: 0 });
 
-  // Fetch users from the database when the component mounts
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:5555/users'); // Adjust the URL based on your backend
-        if (response.status === 200) {
-          setUsers(response.data); // Set the users state with the fetched data
-        } else {
-          throw new Error("Failed to fetch users");
-        }
-      } catch (err) {
-        setError(err.message); // Set the error message if there's an error
-      } finally {
-        setLoading(false); // Set loading to false regardless of success or error
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5555/users');
+      if (response.status === 200) {
+        console.log("Fetched users:", response.data);  // Log response data
+        setUsers(response.data);
+      } else {
+        throw new Error("Failed to fetch users");
       }
-    };
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchUsers(); // Call the function to fetch users
-  }, []); // Empty dependency array to run only on mount
+  fetchUsers();
+}, []);
+
 
   const handleEditClick = (user) => {
-    setEditingUserId(user.id); // Set the user ID to edit
-    setUpdatedUser({ name: user.name, email: user.email, balance: user.balance }); // Pre-fill the form with current user data
+    setEditingUserId(user.id);
+    setUpdatedUser({
+      name: user.name,
+      email: user.email,
+      balance: user.balance,
+      total_earnings: user.total_earnings
+    });
   };
 
   const handleUpdateUser = async (userId) => {
     try {
-      const response = await axios.patch(`http://127.0.0.1:5555/users/${userId}`, updatedUser); // Update user API call
+      const response = await axios.patch(`http://127.0.0.1:5555/users/${userId}`, updatedUser);
       if (response.status === 200) {
         setUsers((prevUsers) => 
           prevUsers.map((user) => (user.id === userId ? { ...user, ...updatedUser } : user))
-        ); // Update the users state with the new data
-        setEditingUserId(null); // Reset editing state
+        );
+        setEditingUserId(null);
       }
     } catch (err) {
-      setError(err.message); // Handle error
+      setError(err.message);
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUpdatedUser((prev) => ({ ...prev, [name]: value })); // Update user data in state
+    setUpdatedUser((prev) => ({ ...prev, [name]: value }));
   };
 
   if (loading) {
-    return <div>Loading users...</div>; // Display loading message
+    return <div>Loading users...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>; // Display error message
+    return <div>Error: {error}</div>;
   }
 
   return (
@@ -71,7 +77,8 @@ function ManageUsers() {
               <th>Name</th>
               <th>Email</th>
               <th>Balance</th>
-              <th>Actions</th> {/* Add actions column */}
+              <th>Total Earnings</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -116,6 +123,18 @@ function ManageUsers() {
                 </td>
                 <td>
                   {editingUserId === user.id ? (
+                    <input
+                      type="number"
+                      name="total_earnings"
+                      value={updatedUser.total_earnings}
+                      onChange={handleInputChange}
+                    />
+                  ) : (
+                    `$${Number(user.total_earnings).toFixed(2)}`
+                  )}
+                </td>
+                <td>
+                  {editingUserId === user.id ? (
                     <button onClick={() => handleUpdateUser(user.id)}>Save</button>
                   ) : (
                     <button onClick={() => handleEditClick(user)}>Edit</button>
@@ -126,8 +145,9 @@ function ManageUsers() {
           </tbody>
         </table>
       ) : (
-        <p>No users found.</p> // Display message if no users
+        <p>No users found.</p>
       )}
+      
     </div>
   );
 }

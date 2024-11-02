@@ -13,8 +13,7 @@ db = SQLAlchemy(metadata=metadata)
 # Users Table
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
-    serialize_only = ('id', 'name', 'email', 'address', 'phone_number', 'role', 'balance')  # Added 'balance' for serialization
-    
+    serialize_only = ('id', 'name', 'email', 'address', 'phone_number', 'role', 'total_earnings', 'balance.amount')  # Include 'total_earnings' and nested 'balance.amount'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)

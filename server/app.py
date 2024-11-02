@@ -8,6 +8,8 @@ from flask_cors import CORS
 from werkzeug.security import check_password_hash,generate_password_hash
 
 
+
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get(
     "DB_URI", f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}")
@@ -22,6 +24,24 @@ app.json.compact = False
 migrate = Migrate(app, db)
 
 db.init_app(app)
+
+
+
+from flask_mail import Mail, Message
+
+# Configure Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # or your email server
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'your-email@gmail.com'  # Your email
+app.config['MAIL_PASSWORD'] = 'your-email-password'   # Your email password or app password
+app.config['MAIL_DEFAULT_SENDER'] = 'your-email@gmail.com'  # Default sender email
+
+mail = Mail(app)
+
+
+
+
 
 #register
 from werkzeug.security import generate_password_hash
@@ -100,7 +120,8 @@ def get_users():
                 'id': user.id,
                 'name': user.name,
                 'email': user.email,
-                'balance': user.balance.amount if user.balance else 0.0  # Access balance amount
+                'balance': user.balance.amount if user.balance else 0.0 , # Access balance amount
+                "total_earnings ": user.total_earnings  or 0 
             }
             user_data.append(user_info)
 
@@ -315,19 +336,18 @@ def update_user_balance(user_id):
 @app.route('/users/<int:user_id>/update-earnings', methods=['PATCH'])
 def update_earnings(user_id):
     data = request.get_json()
-    total_earnings = data.get('total_earnings')
+    commission = data.get('commission')
 
     # Fetch the user from the database
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    # Update the user's total earnings
-    user.total_earnings = total_earnings
+    # Increment the user's total earnings by the commission amount
+    user.total_earnings += commission
     db.session.commit()
 
-    return jsonify({'message': 'Total earnings updated successfully'}), 200
-
+    return jsonify({'message': 'Total earnings updated successfully', 'total_earnings': user.total_earnings}), 200
 
 
 

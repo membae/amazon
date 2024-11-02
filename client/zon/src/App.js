@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import Signup from './pages/Signup';
 import Signin from './pages/Signin';
 import ManageUsers from './pages/ManageUsers';
+import ManageProducts from './pages/ManageProducts';
 
 const App = () => {
     const location = useLocation();  // Use location hook to get current path
@@ -29,6 +30,7 @@ const App = () => {
                 <Route path="/wallet" element={<BalancePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/admin" element={<ManageUsers />} />
+                <Route path="/manageProducts" element={<ManageProducts />} />
             </Routes>
 
             {/* Conditionally render Footer if not on signin/signup */}
