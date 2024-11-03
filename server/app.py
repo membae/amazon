@@ -120,8 +120,9 @@ def get_users():
                 'id': user.id,
                 'name': user.name,
                 'email': user.email,
+                "phone_number":user.phone_number,
                 'balance': user.balance.amount if user.balance else 0.0 , # Access balance amount
-                "total_earnings ": user.total_earnings  or 0 
+                "total_earnings": user.total_earnings 
             }
             user_data.append(user_info)
 
@@ -211,9 +212,14 @@ def patch_user(user_id):
             # Create a new balance entry if it doesn't exist
             new_balance = Balance(user_id=user.id, amount=data['balance'])
             db.session.add(new_balance)
+    
+    if 'total_earnings' in data:
+        # Assuming total_earnings is a direct attribute of User model
+        user.total_earnings = data['total_earnings']
 
     db.session.commit()
     return jsonify(user.to_dict()), 200
+
 
 # Delete a user by ID
 @app.route('/users/<int:user_id>', methods=['DELETE'])

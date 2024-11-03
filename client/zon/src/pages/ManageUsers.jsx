@@ -8,26 +8,24 @@ function ManageUsers() {
   const [editingUserId, setEditingUserId] = useState(null);
   const [updatedUser, setUpdatedUser] = useState({ name: '', email: '', balance: 0, total_earnings: 0 });
 
-useEffect(() => {
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:5555/users');
-      if (response.status === 200) {
-        console.log("Fetched users:", response.data);  // Log response data
-        setUsers(response.data);
-      } else {
-        throw new Error("Failed to fetch users");
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:5555/users');
+        if (response.status === 200) {
+          setUsers(response.data);
+        } else {
+          throw new Error("Failed to fetch users");
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchUsers();
-}, []);
-
+    fetchUsers();
+  }, []);
 
   const handleEditClick = (user) => {
     setEditingUserId(user.id);
@@ -41,12 +39,16 @@ useEffect(() => {
 
   const handleUpdateUser = async (userId) => {
     try {
+      // Send the updated user data to the backend
       const response = await axios.patch(`http://127.0.0.1:5555/users/${userId}`, updatedUser);
       if (response.status === 200) {
+        // Update the local state with the new user data
         setUsers((prevUsers) => 
           prevUsers.map((user) => (user.id === userId ? { ...user, ...updatedUser } : user))
         );
-        setEditingUserId(null);
+        setEditingUserId(null);  // Exit edit mode
+      } else {
+        throw new Error("Failed to update user");
       }
     } catch (err) {
       setError(err.message);
@@ -147,7 +149,6 @@ useEffect(() => {
       ) : (
         <p>No users found.</p>
       )}
-      
     </div>
   );
 }
