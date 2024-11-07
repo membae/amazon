@@ -4,11 +4,11 @@ import Cookies from 'js-cookie';
 import './Navbar.css'; // Importing the CSS
 
 const Navbar = () => {
-    // Get the user's email from cookies
-    const userName = Cookies.get('user_name');
+    // Get the user's role from cookies
+    const userRole = Cookies.get('user_role');
 
-    // Check if the email includes 'admin'
-    const isAdmin = userName && userName.includes('admin');
+    // Check if the role is 'admin'
+    const isAdmin = userRole === 'admin';
 
     return (
         <nav>

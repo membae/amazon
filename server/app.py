@@ -91,7 +91,16 @@ def login():
     session['user_email'] = user.email
     session['user_role'] = user.role
 
-    return jsonify({"message": "Login successful!", "user": {"id": user.id, "name": user.name}}), 200
+    return jsonify({
+    "message": "Login successful!",
+    "user": {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "phone_number": user.phone_number,  # Ensure this field exists in your User model
+        "role": user.role
+    }
+}), 200
 
 @app.route('/logout', methods=['POST'])
 def logout():

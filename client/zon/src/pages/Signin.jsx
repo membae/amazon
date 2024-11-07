@@ -27,7 +27,7 @@ const Signin = () => {
             const response = await axios.post('http://127.0.0.1:5555/login', formData, {
                 withCredentials: true
             });
-            console.log('Response:', response);
+            console.log( response.data);
 
             if (response.data.message === 'Login successful!') {
                 alert("Login successful!");
