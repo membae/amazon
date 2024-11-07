@@ -6,7 +6,7 @@ function ManageUsers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editingUserId, setEditingUserId] = useState(null);
-  const [updatedUser, setUpdatedUser] = useState({ name: '', email: '', balance: 0, total_earnings: 0 });
+  const [updatedUser, setUpdatedUser] = useState({ name: '', email: '', role: '', balance: 0, total_earnings: 0 });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -32,21 +32,20 @@ function ManageUsers() {
     setUpdatedUser({
       name: user.name,
       email: user.email,
+      role: user.role,
       balance: user.balance,
-      total_earnings: user.total_earnings
+      total_earnings: user.total_earnings,
     });
   };
 
   const handleUpdateUser = async (userId) => {
     try {
-      // Send the updated user data to the backend
       const response = await axios.patch(`http://127.0.0.1:5555/users/${userId}`, updatedUser);
       if (response.status === 200) {
-        // Update the local state with the new user data
-        setUsers((prevUsers) => 
+        setUsers((prevUsers) =>
           prevUsers.map((user) => (user.id === userId ? { ...user, ...updatedUser } : user))
         );
-        setEditingUserId(null);  // Exit edit mode
+        setEditingUserId(null);
       } else {
         throw new Error("Failed to update user");
       }
@@ -79,12 +78,13 @@ function ManageUsers() {
               <th>Name</th>
               <th>Email</th>
               <th>Balance</th>
+              <th>Role</th>
               <th>Total Earnings</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {users.map((user) => (
               <tr key={user.id}>
                 <td>{user.id}</td>
                 <td>
@@ -121,6 +121,18 @@ function ManageUsers() {
                     />
                   ) : (
                     `$${Number(user.balance).toFixed(2)}`
+                  )}
+                </td>
+                <td>
+                  {editingUserId === user.id ? (
+                    <input
+                      type="text"
+                      name="role"
+                      value={updatedUser.role}
+                      onChange={handleInputChange}
+                    />
+                  ) : (
+                    user.role
                   )}
                 </td>
                 <td>

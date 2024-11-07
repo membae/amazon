@@ -122,7 +122,8 @@ def get_users():
                 'email': user.email,
                 "phone_number":user.phone_number,
                 'balance': user.balance.amount if user.balance else 0.0 , # Access balance amount
-                "total_earnings": user.total_earnings 
+                "total_earnings": user.total_earnings,
+                "role":user.role
             }
             user_data.append(user_info)
 
@@ -144,6 +145,7 @@ def get_users():
 #         return jsonify({"error": "User not found"}), 404
     
 #     return jsonify(user.to_dict()), 200
+
 
 
 # Get a specific user by ID
