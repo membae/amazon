@@ -14,14 +14,14 @@ function ManageProducts() {
     commission: ''
   });
   const [loading, setLoading] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Fetch products from the database
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      const response = await fetch('http://127.0.0.1:5555/products'); // Corrected endpoint
+      const response = await fetch('http://127.0.0.1:5555/products');
       const data = await response.json();
-      console.log(data); // Check the data structure
       setProducts(data);
       setLoading(false);
     };
@@ -87,9 +87,9 @@ function ManageProducts() {
   }
 
   return (
-    <div>
-      <h1>Manage Products</h1>
-      <form onSubmit={handleSubmit}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Manage Products</h1>
+      <form onSubmit={handleSubmit} style={{ marginBottom: '20px', border: '1px solid #ddd', padding: '20px', borderRadius: '10px', backgroundColor: '#f9f9f9' }}>
         <input
           type="text"
           name="name"
@@ -97,6 +97,7 @@ function ManageProducts() {
           onChange={handleInputChange}
           placeholder="Product Name"
           required
+          style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
         <textarea
           name="description"
@@ -104,6 +105,7 @@ function ManageProducts() {
           onChange={handleInputChange}
           placeholder="Description"
           required
+          style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', resize: 'vertical' }}
         />
         <input
           type="number"
@@ -113,6 +115,7 @@ function ManageProducts() {
           placeholder="Price"
           step="0.01"
           required
+          style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
         <input
           type="number"
@@ -121,6 +124,7 @@ function ManageProducts() {
           onChange={handleInputChange}
           placeholder="Stock"
           required
+          style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
         <input
           type="text"
@@ -129,6 +133,7 @@ function ManageProducts() {
           onChange={handleInputChange}
           placeholder="Category ID"
           required
+          style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
         <input
           type="text"
@@ -136,6 +141,7 @@ function ManageProducts() {
           value={formData.brand}
           onChange={handleInputChange}
           placeholder="Brand"
+          style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
         <input
           type="text"
@@ -143,6 +149,7 @@ function ManageProducts() {
           value={formData.image_url}
           onChange={handleInputChange}
           placeholder="Image URL"
+          style={{ marginBottom: '10px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
         <input
           type="number"
@@ -152,41 +159,59 @@ function ManageProducts() {
           placeholder="Commission"
           step="0.01"
           required
+          style={{ marginBottom: '20px', display: 'block', width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
-        <button type="submit">{editProduct ? 'Update Product' : 'Add Product'}</button>
+        <button
+          type="submit"
+          style={{
+            padding: '12px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            backgroundColor: isHovered ? '#45a049' : '#4caf50',
+            color: 'white',
+            cursor: 'pointer',
+            transition: 'background-color 0.3s ease',
+            width: '100%',
+            fontWeight: 'bold'
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {editProduct ? 'Update Product' : 'Add Product'}
+        </button>
       </form>
 
       <h2>Existing Products</h2>
-      <table>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Category ID</th>
-            <th>Brand</th>
-            <th>Image URL</th>
-            <th>Commission</th>
-            <th>Actions</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>ID</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Name</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Description</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Price</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Stock</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Category ID</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Brand</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Image</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Commission</th>
+            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {products.map(product => (
             <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.name}</td>
-              <td>{product.description}</td>
-              <td>${product.price}</td>
-              <td>{product.stock}</td>
-              <td>{product.category_id}</td>
-              <td>{product.brand}</td>
-              <td><img src={product.image_url} alt={product.name} width="50" /></td>
-              <td>${product.commission}</td>
-              <td>
-                <button onClick={() => handleEdit(product)}>Edit</button>
-                <button onClick={() => handleDelete(product.id)}>Delete</button>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.id}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.name}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.description}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.price}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.stock}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.category_id}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.brand}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}><img src={product.image_url} alt={product.name} style={{ maxWidth: '50px' }} /></td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{product.commission}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>
+                <button onClick={() => handleEdit(product)} style={{ marginRight: '5px', backgroundColor: '#008cba', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
+                <button onClick={() => handleDelete(product.id)} style={{ backgroundColor: '#f44336', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
               </td>
             </tr>
           ))}

@@ -148,7 +148,7 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      <h1>User Profile</h1>
+      <h1>Your Profile</h1>
       <h2>Balance: ${balance.toFixed(2)}</h2>
 
       <div className="action-buttons">

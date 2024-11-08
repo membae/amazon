@@ -5,26 +5,69 @@ import Cookies from "js-cookie";
 // Component for payment options
 const PaymentOptions = ({ onSelect, paymentMethod, onUploadMessage }) => {
   return (
-    <div className="payment-options">
-      <h3>Select a Payment Method</h3>
-      <button onClick={() => onSelect("M-Pesa")}>M-Pesa</button>
-      <button onClick={() => onSelect("Crypto")}>Crypto</button>
+    <div style={{
+      padding: '20px', 
+      backgroundColor: '#f7f7f7', 
+      borderRadius: '8px', 
+      marginTop: '20px', 
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+    }}>
+      <h3 style={{ color: '#333' }}>Select a Payment Method</h3>
+      <button 
+        onClick={() => onSelect("M-Pesa")} 
+        style={{
+          backgroundColor: '#28a745', 
+          color: '#fff', 
+          padding: '10px 20px', 
+          fontSize: '1rem', 
+          border: 'none', 
+          borderRadius: '5px', 
+          cursor: 'pointer', 
+          marginRight: '10px'
+        }}
+      >
+        M-Pesa
+      </button>
+      <button 
+        onClick={() => onSelect("Crypto")} 
+        style={{
+          backgroundColor: '#28a745', 
+          color: '#fff', 
+          padding: '10px 20px', 
+          fontSize: '1rem', 
+          border: 'none', 
+          borderRadius: '5px', 
+          cursor: 'pointer'
+        }}
+      >
+        Crypto
+      </button>
 
       {paymentMethod === "M-Pesa" && (
         <div>
-          <p>Pay to: <strong>0123456789</strong></p>
+          <p style={{ color: '#333' }}>Pay to: <strong>0123456789</strong></p>
           <textarea
             placeholder="Upload M-Pesa message"
             onChange={(e) => onUploadMessage(e.target.value)}
             rows="4"
             cols="50"
+            style={{
+              width: '100%',
+              padding: '10px',
+              marginTop: '10px',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              fontSize: '1rem',
+              minHeight: '100px',
+              resize: 'vertical'
+            }}
           />
         </div>
       )}
 
       {paymentMethod === "Crypto" && (
         <div>
-          <p>Pay to Crypto Wallet Address: <strong>1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</strong></p>
+          <p style={{ color: '#333' }}>Pay to Crypto Wallet Address: <strong>1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</strong></p>
         </div>
       )}
     </div>
@@ -32,28 +75,27 @@ const PaymentOptions = ({ onSelect, paymentMethod, onUploadMessage }) => {
 }
 
 function BalancePage() {
-  const [balance, setBalance] = useState(0); // Initialize balance to 0
+  const [balance, setBalance] = useState(0); 
   const [rechargeAmount, setRechargeAmount] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState(0);
   const [error, setError] = useState("");
-  const [notification, setNotification] = useState(""); // State for notifications
-  const [showPaymentOptions, setShowPaymentOptions] = useState(false); // State to toggle payment options
-  const [paymentMethod, setPaymentMethod] = useState(""); // State to hold selected payment method
-  const [mpesaMessage, setMpesaMessage] = useState(""); // State to hold M-Pesa message
+  const [notification, setNotification] = useState(""); 
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false); 
+  const [paymentMethod, setPaymentMethod] = useState(""); 
+  const [mpesaMessage, setMpesaMessage] = useState(""); 
 
-  // Fetch the balance for the currently logged-in user
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const user_id = Cookies.get("user_id"); // Assuming user_id is stored in cookies
+        const user_id = Cookies.get("user_id"); 
         if (!user_id) throw new Error("User ID not found");
 
         const response = await axios.get(`http://127.0.0.1:5555/users/${user_id}/balance`, {
-          withCredentials: true, // Send cookies with the request if needed
+          withCredentials: true, 
         });
 
         if (response.status === 200) {
-          setBalance(response.data.balance); // Assuming the balance is returned in response.data.balance
+          setBalance(response.data.balance); 
         } else {
           throw new Error("Failed to fetch balance");
         }
@@ -71,21 +113,20 @@ function BalancePage() {
       return;
     }
 
-    // Make an API call to recharge the balance (adjust this to your backend logic)
     const rechargeBalance = async () => {
       try {
         const user_id = Cookies.get("user_id");
         const response = await axios.post(`http://127.0.0.1:5555/users/${user_id}/recharge`, {
           amount: rechargeAmount,
           paymentMethod: paymentMethod,
-          mpesaMessage: mpesaMessage, // Include M-Pesa message in the request if applicable
+          mpesaMessage: mpesaMessage,
         }, { withCredentials: true });
 
         if (response.status === 200) {
           setBalance((prevBalance) => prevBalance + parseFloat(rechargeAmount));
           setNotification(`Successfully recharged $${rechargeAmount}`);
           setRechargeAmount(0);
-          setShowPaymentOptions(false); // Hide payment options after recharge
+          setShowPaymentOptions(false); 
         } else {
           throw new Error("Failed to recharge balance");
         }
@@ -107,7 +148,6 @@ function BalancePage() {
       return;
     }
 
-    // Make an API call to withdraw the balance (adjust this to your backend logic)
     const withdrawBalance = async () => {
       try {
         const user_id = Cookies.get("user_id");
@@ -131,21 +171,69 @@ function BalancePage() {
   };
 
   return (
-    <div className="balance-page">
-      <h1>Account Balance</h1>
-      <h2>${balance.toFixed(2)}</h2>
+    <div style={{
+      width: '80%', 
+      margin: '0 auto', 
+      padding: '20px', 
+      backgroundColor: '#fff', 
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', 
+      borderRadius: '8px', 
+      marginTop: '20px'
+    }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '10px' }}>Account Balance</h1>
+      <h2 style={{
+        textAlign: 'center', 
+        marginBottom: '30px', 
+        fontSize: '2em', 
+        color: '#4CAF50'
+      }}>${balance.toFixed(2)}</h2>
 
-      {notification && <p className="notification">{notification}</p>} {/* Display notification */}
+      {notification && (
+        <p style={{
+          backgroundColor: '#d4edda', 
+          color: '#155724', 
+          padding: '10px', 
+          margin: '15px 0', 
+          borderRadius: '5px', 
+          fontWeight: 'bold'
+        }}>
+          {notification}
+        </p>
+      )}
 
-      <div className="recharge-section">
-        <h3>Recharge Balance</h3>
+      <div style={{ marginBottom: '30px' }}>
+        <h3 style={{ marginBottom: '10px', color: '#333' }}>Recharge Balance</h3>
         <input
           type="number"
           value={rechargeAmount}
           onChange={(e) => setRechargeAmount(e.target.value)}
           placeholder="Enter amount to recharge"
+          style={{
+            padding: '10px', 
+            width: '100%', 
+            maxWidth: '300px', 
+            marginBottom: '10px', 
+            border: '1px solid #ccc', 
+            borderRadius: '5px', 
+            fontSize: '1rem'
+          }}
         />
-        <button onClick={() => setShowPaymentOptions(true)}>Choose Payment Method</button> {/* Button to show payment options */}
+        <button 
+          onClick={() => setShowPaymentOptions(true)} 
+          style={{
+            backgroundColor: '#007bff', 
+            color: '#fff', 
+            padding: '10px 20px', 
+            fontSize: '1rem', 
+            border: 'none', 
+            borderRadius: '5px', 
+            cursor: 'pointer', 
+            transition: 'background-color 0.3s'
+          }}
+        >
+          Choose Payment Method
+        </button>
+
         {showPaymentOptions && (
           <PaymentOptions
             onSelect={(method) => {
@@ -153,23 +241,57 @@ function BalancePage() {
               setShowPaymentOptions(true);
             }}
             paymentMethod={paymentMethod}
-            onUploadMessage={setMpesaMessage} // Callback to set the M-Pesa message
+            onUploadMessage={setMpesaMessage} 
           />
         )}
       </div>
 
-      <div className="withdraw-section">
-        <h3>Withdraw Balance</h3>
+      <div style={{ marginBottom: '30px' }}>
+        <h3 style={{ marginBottom: '10px', color: '#333' }}>Withdraw Balance</h3>
         <input
           type="number"
           value={withdrawAmount}
           onChange={(e) => setWithdrawAmount(e.target.value)}
           placeholder="Enter amount to withdraw"
+          style={{
+            padding: '10px', 
+            width: '100%', 
+            maxWidth: '300px', 
+            marginBottom: '10px', 
+            border: '1px solid #ccc', 
+            borderRadius: '5px', 
+            fontSize: '1rem'
+          }}
         />
-        <button onClick={handleWithdraw}>Withdraw</button>
+        <button 
+          onClick={handleWithdraw} 
+          style={{
+            backgroundColor: '#007bff', 
+            color: '#fff', 
+            padding: '10px 20px', 
+            fontSize: '1rem', 
+            border: 'none', 
+            borderRadius: '5px', 
+            cursor: 'pointer', 
+            transition: 'background-color 0.3s'
+          }}
+        >
+          Withdraw
+        </button>
       </div>
 
-      {error && <p className="error">{error}</p>}
+      {error && (
+        <p style={{
+          backgroundColor: '#f8d7da', 
+          color: '#721c24', 
+          padding: '10px', 
+          margin: '15px 0', 
+          borderRadius: '5px', 
+          fontWeight: 'bold'
+        }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

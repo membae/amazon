@@ -68,90 +68,95 @@ function ManageUsers() {
   }
 
   return (
-    <div>
-      <h1>Manage Users</h1>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ textAlign: 'center', color: '#333' }}>Manage Users</h1>
       {users.length > 0 ? (
-        <table>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
           <thead>
-            <tr>
-              <th>User ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Balance</th>
-              <th>Role</th>
-              <th>Total Earnings</th>
-              <th>Actions</th>
+            <tr style={{ backgroundColor: '#f2f2f2' }}>
+              <th style={tableHeaderStyle}>User ID</th>
+              <th style={tableHeaderStyle}>Name</th>
+              <th style={tableHeaderStyle}>Email</th>
+              <th style={tableHeaderStyle}>Balance</th>
+              <th style={tableHeaderStyle}>Role</th>
+              <th style={tableHeaderStyle}>Total Earnings</th>
+              <th style={tableHeaderStyle}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>
+              <tr key={user.id} style={{ borderBottom: '1px solid #ddd' }}>
+                <td style={tableCellStyle}>{user.id}</td>
+                <td style={tableCellStyle}>
                   {editingUserId === user.id ? (
                     <input
                       type="text"
                       name="name"
                       value={updatedUser.name}
                       onChange={handleInputChange}
+                      style={inputStyle}
                     />
                   ) : (
                     user.name
                   )}
                 </td>
-                <td>
+                <td style={tableCellStyle}>
                   {editingUserId === user.id ? (
                     <input
                       type="email"
                       name="email"
                       value={updatedUser.email}
                       onChange={handleInputChange}
+                      style={inputStyle}
                     />
                   ) : (
                     user.email
                   )}
                 </td>
-                <td>
+                <td style={tableCellStyle}>
                   {editingUserId === user.id ? (
                     <input
                       type="number"
                       name="balance"
                       value={updatedUser.balance}
                       onChange={handleInputChange}
+                      style={inputStyle}
                     />
                   ) : (
                     `$${Number(user.balance).toFixed(2)}`
                   )}
                 </td>
-                <td>
+                <td style={tableCellStyle}>
                   {editingUserId === user.id ? (
                     <input
                       type="text"
                       name="role"
                       value={updatedUser.role}
                       onChange={handleInputChange}
+                      style={inputStyle}
                     />
                   ) : (
                     user.role
                   )}
                 </td>
-                <td>
+                <td style={tableCellStyle}>
                   {editingUserId === user.id ? (
                     <input
                       type="number"
                       name="total_earnings"
                       value={updatedUser.total_earnings}
                       onChange={handleInputChange}
+                      style={inputStyle}
                     />
                   ) : (
                     `$${Number(user.total_earnings).toFixed(2)}`
                   )}
                 </td>
-                <td>
+                <td style={tableCellStyle}>
                   {editingUserId === user.id ? (
-                    <button onClick={() => handleUpdateUser(user.id)}>Save</button>
+                    <button onClick={() => handleUpdateUser(user.id)} style={saveButtonStyle}>Save</button>
                   ) : (
-                    <button onClick={() => handleEditClick(user)}>Edit</button>
+                    <button onClick={() => handleEditClick(user)} style={editButtonStyle}>Edit</button>
                   )}
                 </td>
               </tr>
@@ -164,5 +169,45 @@ function ManageUsers() {
     </div>
   );
 }
+
+// Styles for the table, input, and buttons
+const tableHeaderStyle = {
+  padding: '12px',
+  textAlign: 'left',
+  backgroundColor: '#f4f4f4',
+  border: '1px solid #ddd',
+};
+
+const tableCellStyle = {
+  padding: '10px',
+  border: '1px solid #ddd',
+  textAlign: 'center',
+};
+
+const inputStyle = {
+  padding: '8px',
+  width: '90%',
+  border: '1px solid #ccc',
+  borderRadius: '4px',
+  boxSizing: 'border-box',
+};
+
+const editButtonStyle = {
+  padding: '8px 16px',
+  backgroundColor: '#008cba',
+  color: 'white',
+  border: 'none',
+  borderRadius: '5px',
+  cursor: 'pointer',
+};
+
+const saveButtonStyle = {
+  padding: '8px 16px',
+  backgroundColor: '#4CAF50',
+  color: 'white',
+  border: 'none',
+  borderRadius: '5px',
+  cursor: 'pointer',
+};
 
 export default ManageUsers;
