@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import './Auth.css'; // Import the CSS file (you can keep this if you have additional styles)
+import emailjs from 'emailjs-com'; // Import EmailJS
+import './Auth.css';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -52,27 +53,53 @@ const Signup = () => {
                 Cookies.set('token', token);
             }
 
+            // Send welcome email to the user
+            emailjs.send('service_3ygj9sb', 'template_lgsd1ga', {
+                to_name: formData.name,
+                to_email: formData.email,
+                message: 'Welcome to our shop! We’re delighted to have you join us. Explore our range of products and enjoy exclusive deals and offers. Happy shopping!',
+            }, 'rHMCfjJwQ86mQP0Cp') // Replace 'rHMCfjJwQ86mQP0Cp' with your actual EmailJS user ID
+            .then((result) => {
+                console.log('User email sent successfully:', result.text);
+            }, (error) => {
+                console.error('Error sending user email:', error.text);
+            });
+
+            // Send notification email to admin
+            emailjs.send('service_3ygj9sb', 'template_yu5vasp', {
+                admin_email: 'codeazon415@gmail.com', // Replace with your admin email
+                user_name: formData.name,
+                user_email: formData.email,
+                user_phone: formData.phone_number,
+                user_address: formData.address,
+            }, 'rHMCfjJwQ86mQP0Cp') // Replace 'rHMCfjJwQ86mQP0Cp' with your actual EmailJS user ID
+            .then((result) => {
+                console.log('Admin notification sent successfully:', result.text);
+            }, (error) => {
+                console.error('Error sending admin notification:', error.text);
+            });
+
+            // Navigate to login page after signup
             navigate('/login');
         } catch (error) {
-            setErrorMessage(error.response.data.message || 'Error registering. Please try again.');
+            setErrorMessage(error.response?.data?.message || 'Error registering. Please try again.');
         }
     };
 
-    // Inline CSS Styles
     const containerStyle = {
-        backgroundImage: 'url(/amazonback.jpg)', // Path relative to the public folder
+        backgroundImage: 'url(/amazonback.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        minHeight: '100vh', // Ensure the background covers the entire screen
+        minHeight: '100vh',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        color: 'black', // Text color for readability
+        color: 'black',
         padding: '20px'
     };
 
     const formStyle = {
-        background: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background for the form
+        background: 'rgba(0, 0, 0, 0.5)',
         padding: '20px',
         borderRadius: '8px',
         width: '100%',
