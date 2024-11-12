@@ -11,7 +11,7 @@ function ManageUsers() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5555/users');
+        const response = await axios.get('https://amazon-cp0v.onrender.com/users');
         if (response.status === 200) {
           setUsers(response.data);
         } else {
@@ -40,7 +40,7 @@ function ManageUsers() {
 
   const handleUpdateUser = async (userId) => {
     try {
-      const response = await axios.patch(`http://127.0.0.1:5555/users/${userId}`, updatedUser);
+      const response = await axios.patch(`https://amazon-cp0v.onrender.com/users/${userId}`, updatedUser);
       if (response.status === 200) {
         setUsers((prevUsers) =>
           prevUsers.map((user) => (user.id === userId ? { ...user, ...updatedUser } : user))

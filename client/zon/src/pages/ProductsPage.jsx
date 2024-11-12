@@ -11,28 +11,26 @@ function ProductPage() {
   const [balance, setBalance] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(
     parseFloat(localStorage.getItem("totalEarnings")) || 0
-  ); // Initialize from localStorage
+  );
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [purchaseError, setPurchaseError] = useState("");
   const [orderId, setOrderId] = useState(null);
 
-  // Fetch the user's balance when the component loads
   useEffect(() => {
     const fetchBalance = async () => {
       try {
         const user_id = Cookies.get("user_id");
         if (!user_id) throw new Error("User ID not found");
 
-        const response = await axios.get(`http://127.0.0.1:5555/users/${user_id}/balance`, {
+        const response = await axios.get(`https://amazon-cp0v.onrender.com/users/${user_id}/balance`, {
           withCredentials: true,
         });
 
         if (response.status === 200) {
           setBalance(response.data.balance);
           if (totalEarnings === 0) {
-            // Initialize total earnings only if not set
             setTotalEarnings(response.data.balance);
           }
         } else {
@@ -42,10 +40,9 @@ function ProductPage() {
         if (err.response && err.response.status === 404) {
           setBalance(0);
           setTotalEarnings(0);
-
           try {
             const user_id = Cookies.get("user_id");
-            await axios.post(`http://127.0.0.1:5555/users/${user_id}/initialize-balance`, { amount: 0 });
+            await axios.post(`https://amazon-cp0v.onrender.com/users/${user_id}/initialize-balance`, { amount: 0 });
           } catch (initializeError) {
             console.error("Failed to initialize balance:", initializeError);
           }
@@ -60,16 +57,14 @@ function ProductPage() {
     fetchBalance();
   }, []);
 
-  // Save totalEarnings to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("totalEarnings", totalEarnings.toFixed(2));
   }, [totalEarnings]);
 
-  // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:5555/products");
+        const response = await axios.get("https://amazon-cp0v.onrender.com/products");
         console.log(response.data);
         if (response.status === 200) {
           setProducts(response.data);
@@ -86,23 +81,22 @@ function ProductPage() {
     fetchProducts();
   }, []);
 
-  // Handle product purchase
   const handleBuy = async (product) => {
     setPurchaseError("");
-  
+
     const commissionAmount = product.price * product.commission;
     const totalCost = product.price - commissionAmount;
-  
+
     if (balance < totalCost) {
       setPurchaseError("Insufficient balance.");
       return;
     }
-  
+
     try {
       const user_id = Cookies.get("user_id");
-  
+
       const orderData = {
-        shipping_address: "123 Main St, Anytown, USA", // Replace with user-provided address
+        shipping_address: "123 Main St, Anytown, USA",
         payment_method: "mpesa",
         order_items: [
           {
@@ -113,10 +107,10 @@ function ProductPage() {
           },
         ],
       };
-  
+
       if (!orderId) {
         const newOrderResponse = await axios.post(
-          `http://127.0.0.1:5555/orders/${user_id}`,
+          `https://amazon-cp0v.onrender.com/orders/${user_id}`,
           orderData,
           { headers: { "Content-Type": "application/json" } }
         );
@@ -127,7 +121,7 @@ function ProductPage() {
         }
       } else {
         const updateOrderResponse = await axios.post(
-          `http://127.0.0.1:5555/orders/${orderId}/items`,
+          `https://amazon-cp0v.onrender.com/orders/${orderId}/items`,
           {
             product_id: product.id,
             quantity: 1,
@@ -136,29 +130,28 @@ function ProductPage() {
           },
           { headers: { "Content-Type": "application/json" } }
         );
-  
+
         if (updateOrderResponse.status !== 201) {
           throw new Error("Failed to add item to the order");
         }
       }
-  
+
       const newBalance = balance - totalCost;
       const balanceUpdateResponse = await axios.patch(
-        `http://127.0.0.1:5555/users/${user_id}/balance`,
+        `https://amazon-cp0v.onrender.com/users/${user_id}/balance`,
         { amount: newBalance },
         { headers: { "Content-Type": "application/json" } }
       );
-  
+
       if (balanceUpdateResponse.status === 200) {
         setBalance(newBalance);
-  
-        // Update total earnings in the database with commission amount
+
         const earningsUpdateResponse = await axios.patch(
-          `http://127.0.0.1:5555/users/${user_id}/update-earnings`,
+          `https://amazon-cp0v.onrender.com/users/${user_id}/update-earnings`,
           { commission: commissionAmount },
           { headers: { "Content-Type": "application/json" } }
         );
-  
+
         if (earningsUpdateResponse.status === 200) {
           setTotalEarnings(earningsUpdateResponse.data.total_earnings);
         } else {
@@ -184,7 +177,6 @@ function ProductPage() {
     VIP3: products.filter((product) => categoryLevelMap[product.category_id] === "VIP3"),
   };
 
-  // Function to get the background image
   const getBackgroundImage = (product) => {
     switch (product.name) {
       case "VIP1 Product 1":
@@ -223,11 +215,11 @@ function ProductPage() {
                   key={product.id}
                   className="product-item"
                   style={{
-                    backgroundImage: getBackgroundImage(product), // Call the function to get the background image
+                    backgroundImage: getBackgroundImage(product),
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    height: '200px', // Set a fixed height for the product box
-                    color: 'white', // Adjust text color for readability
+                    height: '200px',
+                    color: 'white',
                     padding: '10px',
                     borderRadius: '5px',
                     marginBottom: '20px',

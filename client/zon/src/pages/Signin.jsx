@@ -24,7 +24,7 @@ const Signin = () => {
         e.preventDefault();
         setError('');
         try {
-            const response = await axios.post('http://127.0.0.1:5555/login', formData, {
+            const response = await axios.post('https://amazon-cp0v.onrender.com/login', formData, {
                 withCredentials: true
             });
             console.log(response.data);

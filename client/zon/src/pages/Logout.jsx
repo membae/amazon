@@ -5,7 +5,7 @@ const Logout = () => {
 
     const handleLogout = async () => {
         try {
-            await axios.post('/http://127.0.0.1:5555/logout'); // Logout API call
+            await axios.post('https://amazon-cp0v.onrender.com/logout'); // Logout API call
             sessionStorage.removeItem('user'); // Clear user from session storage
             alert('Logout successful!');
             navigate('/login'); // Redirect to the sign-in page

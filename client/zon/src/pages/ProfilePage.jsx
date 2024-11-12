@@ -8,7 +8,7 @@ const fetchUserDetails = async () => {
     const user_id = Cookies.get("user_id");
     if (!user_id) throw new Error("User ID not found in cookies");
 
-    const response = await fetch(`http://127.0.0.1:5555/users/${user_id}`, {
+    const response = await fetch(`https://amazon-cp0v.onrender.com/users/${user_id}`, {
       credentials: "include",
     });
 
@@ -30,7 +30,7 @@ const fetchUserOrders = async () => {
     const user_id = Cookies.get("user_id");
     if (!user_id) throw new Error("User ID not found in cookies");
 
-    const response = await fetch(`http://127.0.0.1:5555/orders/${user_id}`, {
+    const response = await fetch(`https://amazon-cp0v.onrender.com/orders/${user_id}`, {
       credentials: "include",
     });
 
@@ -65,7 +65,7 @@ const ProfilePage = () => {
 
         // Fetch user balance
         const balanceResponse = await axios.get(
-          `http://127.0.0.1:5555/users/${userDetails.id}/balance`,
+          `https://amazon-cp0v.onrender.com/users/${userDetails.id}/balance`,
           { withCredentials: true }
         );
         setBalance(balanceResponse.data.balance);
@@ -107,7 +107,7 @@ const ProfilePage = () => {
   const handleSave = async () => {
     try {
       await axios.patch(
-        `http://127.0.0.1:5555/users/${user.id}`,
+        `https://amazon-cp0v.onrender.com/users/${user.id}`,
         user,
         {
           withCredentials: true,
@@ -123,7 +123,7 @@ const ProfilePage = () => {
   const handleSignOut = async () => {
     try {
       await axios.post(
-        "http://127.0.0.1:5555/logout",
+        "https://amazon-cp0v.onrender.com/logout",
         {},
         {
           withCredentials: true,

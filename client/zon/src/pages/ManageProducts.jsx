@@ -20,7 +20,7 @@ function ManageProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      const response = await fetch('http://127.0.0.1:5555/products');
+      const response = await fetch('https://amazon-cp0v.onrender.com/products');
       const data = await response.json();
       setProducts(data);
       setLoading(false);
@@ -45,13 +45,13 @@ function ManageProducts() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editProduct) {
-      await fetch(`http://127.0.0.1:5555/products/${editProduct.id}`, {
+      await fetch(`https://amazon-cp0v.onrender.com/products/${editProduct.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
     } else {
-      await fetch('http://127.0.0.1:5555/products', {
+      await fetch('https://amazon-cp0v.onrender.com/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -69,14 +69,14 @@ function ManageProducts() {
       commission: ''
     });
     setEditProduct(null);
-    const response = await fetch('http://127.0.0.1:5555/products');
+    const response = await fetch('https://amazon-cp0v.onrender.com/products');
     const data = await response.json();
     setProducts(data);
   };
 
   // Handle product deletion
   const handleDelete = async (id) => {
-    await fetch(`http://127.0.0.1:5555/products/${id}`, {
+    await fetch(`https://amazon-cp0v.onrender.com/products/${id}`, {
       method: 'DELETE',
     });
     setProducts(products.filter(product => product.id !== id));

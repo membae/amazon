@@ -90,7 +90,7 @@ function BalancePage() {
         const user_id = Cookies.get("user_id"); 
         if (!user_id) throw new Error("User ID not found");
 
-        const response = await axios.get(`http://127.0.0.1:5555/users/${user_id}/balance`, {
+        const response = await axios.get(`https://amazon-cp0v.onrender.com/users/${user_id}/balance`, {
           withCredentials: true, 
         });
 
@@ -116,7 +116,7 @@ function BalancePage() {
     const rechargeBalance = async () => {
       try {
         const user_id = Cookies.get("user_id");
-        const response = await axios.post(`http://127.0.0.1:5555/users/${user_id}/recharge`, {
+        const response = await axios.post(`https://amazon-cp0v.onrender.com/users/${user_id}/recharge`, {
           amount: rechargeAmount,
           paymentMethod: paymentMethod,
           mpesaMessage: mpesaMessage,
@@ -151,7 +151,7 @@ function BalancePage() {
     const withdrawBalance = async () => {
       try {
         const user_id = Cookies.get("user_id");
-        const response = await axios.post(`http://127.0.0.1:5555/users/${user_id}/withdraw`, {
+        const response = await axios.post(`https://amazon-cp0v.onrender.com/users/${user_id}/withdraw`, {
           amount: withdrawAmount,
         }, { withCredentials: true });
 

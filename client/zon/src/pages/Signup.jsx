@@ -45,7 +45,7 @@ const Signup = () => {
         }
 
         try {
-            const response = await axios.post('http://127.0.0.1:5555/register', formData, { withCredentials: true });
+            const response = await axios.post('https://amazon-cp0v.onrender.com/register', formData, { withCredentials: true });
             alert(response.data.message);
             
             const { token } = response.data;
