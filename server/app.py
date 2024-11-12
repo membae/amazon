@@ -16,7 +16,7 @@ DATABASE = os.environ.get(
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+CORS(app, supports_credentials=True, origins=['http://localhost:3000', 'https://amazon-pearl.vercel.app'])
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
