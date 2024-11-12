@@ -15,7 +15,10 @@ MarkupSafe==3.0.2
 packaging==24.2
 pipenv==2024.4.0
 platformdirs==4.3.6
-SQLAlchemy==2.0.36
+psycopg2-binary==2.9.9
+pytz==2024.2
+SQLAlchemy==2.0.29
+sqlalchemy-serializer==1.4.22
 typing_extensions==4.12.2
 virtualenv==20.27.1
 Werkzeug==3.1.3
