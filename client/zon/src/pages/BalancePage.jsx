@@ -174,7 +174,7 @@ function BalancePage() {
     <div style={{
       width: '80%', 
       margin: '0 auto', 
-      padding: '20px', 
+      padding: '60px', 
       backgroundColor: '#fff', 
       boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', 
       borderRadius: '8px', 

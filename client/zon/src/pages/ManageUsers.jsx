@@ -68,7 +68,7 @@ function ManageUsers() {
   }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ padding: '60px', fontFamily: 'Arial, sans-serif' }}>
       <h1 style={{ textAlign: 'center', color: '#333' }}>Manage Users</h1>
       {users.length > 0 ? (
         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>

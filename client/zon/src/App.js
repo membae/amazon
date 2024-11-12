@@ -15,7 +15,7 @@ const App = () => {
     const location = useLocation();  // Use location hook to get current path
 
     // Paths where we don't want to show the Navbar and Footer
-    const noNavFooterRoutes = ['/signin', '/signup'];
+    const noNavFooterRoutes = ['/', '/signup'];
 
     return (
         <>
@@ -23,8 +23,9 @@ const App = () => {
             {!noNavFooterRoutes.includes(location.pathname) && <Navbar />}
 
             <Routes>
-                <Route path="/" element={<ProductsPage />} /> 
+                <Route path="/products" element={<ProductsPage />} /> 
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/" element={<Signin />} />
                 <Route path="/login" element={<Signin />} />
                 {/* <Route path="/cart" element={<CartPage />} /> */}
                 <Route path="/wallet" element={<BalancePage />} />

@@ -147,7 +147,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="profile-page">
+    <div className="profile-page" style={{ paddingTop: '60px' }}>
       <h1>Your Profile</h1>
       <h2>Balance: ${balance.toFixed(2)}</h2>
 

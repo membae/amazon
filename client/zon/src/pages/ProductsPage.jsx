@@ -194,11 +194,24 @@ function ProductPage() {
     }
   };
 
+  const isCategoryLocked = (category) => {
+    if (totalEarnings === 0) {
+      return true;
+    }
+    if (totalEarnings > 0 && totalEarnings < 200 && category !== "VIP1") {
+      return true;
+    }
+    if (totalEarnings >= 200 && totalEarnings < 300 && category === "VIP3") {
+      return true;
+    }
+    return false;
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="product-page">
+    <div className="product-page" style={{ paddingTop: '60px' }}>
       <h1>Your Account Balance</h1>
       <h2>${balance.toFixed(2)}</h2>
       <h2>Total Earnings: ${totalEarnings.toFixed(2)}</h2>
@@ -223,17 +236,42 @@ function ProductPage() {
                     padding: '10px',
                     borderRadius: '5px',
                     marginBottom: '20px',
+                    position: 'relative',
+                    opacity: isCategoryLocked(category) ? 0.5 : 1, // Make locked items semi-transparent
+                    pointerEvents: isCategoryLocked(category) ? 'none' : 'auto', // Disable interaction for locked items
                   }}
                 >
+                  {isCategoryLocked(category) && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        color: 'white',
+                        fontSize: '24px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Locked
+                    </div>
+                  )}
                   <h3>{product.name}</h3>
                   <p>{product.description}</p>
                   <p>Price: ${product.price}</p>
                   <p>Commission: ${(product.price * product.commission).toFixed(2)}</p>
-                  <button onClick={() => handleBuy(product)}>Make an Order</button>
+                  {!isCategoryLocked(category) && (
+                    <button onClick={() => handleBuy(product)}>Buy</button>
+                  )}
                 </div>
               ))
             ) : (
-              <p>No {category} products available.</p>
+              <p>No products available for this category.</p>
             )}
           </div>
         </div>

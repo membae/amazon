@@ -87,19 +87,18 @@ const Signup = () => {
     };
 
     const containerStyle = {
-        backgroundImage: 'url(/amazonback.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        minHeight: '100vh',
+        backgroundColor: 'black', // Plain black background
+        minHeight: '100vh', // Ensure the background covers the entire screen
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        color: 'black',
-        padding: '20px'
+        color: 'white', // Text color for readability
+        padding: '20px',
+        fontSize: "80px"
     };
 
     const formStyle = {
-        background: 'rgba(0, 0, 0, 0.5)',
+        background: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background for the form
         padding: '20px',
         borderRadius: '8px',
         width: '100%',

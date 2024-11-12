@@ -1,43 +1,80 @@
-/* src/components/Navbar/Navbar.css */
-
 nav {
-    background-color: #007bff; /* Navbar background */
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-around; /* Space between links */
-    align-items: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #007bff; /* Navbar background */
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between; /* Space for logo and menu icon */
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+nav .menu {
+  display: flex;
+  justify-content: flex-end; /* Align links to the right */
+  flex: 1;
+}
+
+nav a {
+  color: white; /* Link color */
+  text-decoration: none; /* Remove underline */
+  font-size: 18px; /* Font size */
+  padding: 10px 20px; /* Padding for spacing */
+  transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+nav a:hover {
+  background-color: #0056b3; /* Background on hover */
+  border-radius: 5px; /* Rounded corners on hover */
+}
+
+nav a.active {
+  background-color: #0056b3; /* Active link style */
+  border-radius: 5px;
+}
+
+nav a:focus {
+  outline: none; /* Remove focus outline */
+}
+
+/* Hide menu by default on smaller screens */
+.menu {
+  display: none;
+  flex-direction: column;
+  width: 100%; /* Full width for the menu on small screens */
+  background-color: #007bff;
+  position: absolute;
+  top: 60px; /* Adjust based on nav height */
+  right: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.menu a {
+  padding: 10px; /* Spacing for links in vertical menu */
+}
+
+/* Toggle menu visibility */
+.menu.show {
+  display: flex;
+}
+
+.menu-icon {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+/* Show menu icon on smaller screens */
+@media (max-width: 768px) {
+  .menu {
+    display: none; /* Hide menu initially */
   }
-  
-  nav a {
-    color: white; /* Link color */
-    text-decoration: none; /* Remove underline */
-    font-size: 18px; /* Font size */
-    padding: 10px 20px; /* Padding for spacing */
-    transition: background-color 0.3s ease; /* Smooth hover effect */
+
+  .menu-icon {
+    display: block; /* Show menu icon */
   }
-  
-  nav a:hover {
-    background-color: #0056b3; /* Background on hover */
-    border-radius: 5px; /* Rounded corners on hover */
+
+  nav {
+    flex-direction: row; /* Keep navbar horizontal */
   }
-  
-  nav a.active {
-    background-color: #0056b3; /* Active link style */
-    border-radius: 5px;
-  }
-  
-  nav a:focus {
-    outline: none; /* Remove focus outline */
-  }
-  
-  @media (max-width: 768px) {
-    nav {
-      flex-direction: column; /* Stack links vertically on smaller screens */
-    }
-  
-    nav a {
-      margin-bottom: 10px; /* Spacing between links */
-    }
-  }
-  
+}

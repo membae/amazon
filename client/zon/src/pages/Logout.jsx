@@ -8,7 +8,7 @@ const Logout = () => {
             await axios.post('https://amazon-cp0v.onrender.com/logout'); // Logout API call
             sessionStorage.removeItem('user'); // Clear user from session storage
             alert('Logout successful!');
-            navigate('/login'); // Redirect to the sign-in page
+            navigate('/'); // Redirect to the sign-in page
         } catch (error) {
             alert('Error logging out.'); // Handle error
         }

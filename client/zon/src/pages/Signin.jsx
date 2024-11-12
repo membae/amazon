@@ -36,7 +36,7 @@ const Signin = () => {
                 Cookies.set('user_email', response.data.user.email, { expires: 7 });
                 Cookies.set('user_phone', response.data.user.phone_number, { expires: 7 });
                 Cookies.set('user_role', response.data.user.role, { expires: 7 });
-                navigate('/');
+                navigate('/products');
             } else {
                 setError(response.data.message);
             }
@@ -47,16 +47,14 @@ const Signin = () => {
     };
 
     const containerStyle = {
-        backgroundImage: 'url(/amazonback.jpg)', // Path relative to the public folder
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundColor: 'black', // Plain black background
         minHeight: '100vh', // Ensure the background covers the entire screen
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        color: 'black', // Text color for readability
+        color: 'white', // Text color for readability
         padding: '20px',
-        fontSize:"80px"
+        fontSize: "80px"
     };
 
     const formStyle = {

@@ -87,7 +87,7 @@ function ManageProducts() {
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Manage Products</h1>
       <form onSubmit={handleSubmit} style={{ marginBottom: '20px', border: '1px solid #ddd', padding: '20px', borderRadius: '10px', backgroundColor: '#f9f9f9' }}>
         <input
