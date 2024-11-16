@@ -211,7 +211,7 @@ function ProductPage() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="product-page" style={{ paddingTop: '60px' }}>
+    <div className="product-page" style={{ paddingTop: '0px' }}>
      <div className="product-page" style={{ paddingTop: '60px' }}>
   <div className="image-container">
     <img className="responsive-img" src="shopping.jpg" alt="shoppingback" />
