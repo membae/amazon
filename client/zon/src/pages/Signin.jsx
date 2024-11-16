@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import './Auth.css'; // Import the CSS file (you can keep this if you have additional styles)
+import './Auth.css'; // Import the CSS file
 
 const Signin = () => {
     const [formData, setFormData] = useState({
@@ -31,7 +31,7 @@ const Signin = () => {
 
             if (response.data.message === 'Login successful!') {
                 alert("Login successful!");
-                Cookies.set('user_id', response.data.user.id, { expires: 7 });  // Expires in 7 days
+                Cookies.set('user_id', response.data.user.id, { expires: 7 });
                 Cookies.set('user_name', response.data.user.name, { expires: 7 });
                 Cookies.set('user_email', response.data.user.email, { expires: 7 });
                 Cookies.set('user_phone', response.data.user.phone_number, { expires: 7 });
@@ -46,29 +46,10 @@ const Signin = () => {
         }
     };
 
-    const containerStyle = {
-        backgroundColor: 'black', // Plain black background
-        minHeight: '100vh', // Ensure the background covers the entire screen
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        color: 'white', // Text color for readability
-        padding: '20px',
-        fontSize: "80px"
-    };
-
-    const formStyle = {
-        background: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background for the form
-        padding: '20px',
-        borderRadius: '8px',
-        width: '100%',
-        maxWidth: '400px',
-    };
-
     return (
-        <div style={containerStyle}>
-            <h2>Sign In</h2>
-            <form onSubmit={handleSubmit} style={formStyle}>
+        <div className="signin-container">
+            <h2 className="signin-title">Sign In</h2>
+            <form onSubmit={handleSubmit} className="signin-form">
                 <input
                     name="email"
                     placeholder="Email"
@@ -76,7 +57,7 @@ const Signin = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    style={{ width: '100%', marginBottom: '10px', padding: '10px' }}
+                    className="signin-input"
                 />
                 <input
                     name="password"
@@ -85,15 +66,15 @@ const Signin = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    style={{ width: '100%', marginBottom: '10px', padding: '10px' }}
+                    className="signin-input"
                 />
-                <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>
+                <button type="submit" className="signin-button">
                     Login
                 </button>
             </form>
-            {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
-            <p style={{ fontSize: '14px' }}>
-                Don't have an account? <a href="/signup" style={{ color: '#fff', textDecoration: 'underline' }}>Register here</a>
+            {error && <p className="error-message">{error}</p>}
+            <p className="signup-link">
+                Don't have an account? <a href="/signup" className="signup-link-text">Register here</a>
             </p>
         </div>
     );

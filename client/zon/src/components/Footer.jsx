@@ -3,8 +3,16 @@ import React from 'react';
 
 const Footer = () => {
     return (
-        <footer>
-            <p>&copy; 2024 Your Company</p>
+        <footer style={{
+            backgroundColor: '#333',
+            color: '#fff',
+            textAlign: 'center',
+            padding: '20px 0',
+            
+            bottom: 0,
+            width: '100%',
+        }}>
+            <p>&copy; Amazon shopping</p>
         </footer>
     );
 };

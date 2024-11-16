@@ -212,9 +212,19 @@ function ProductPage() {
 
   return (
     <div className="product-page" style={{ paddingTop: '60px' }}>
-      <h1>Your Account Balance</h1>
-      <h2>${balance.toFixed(2)}</h2>
-      <h2>Total Earnings: ${totalEarnings.toFixed(2)}</h2>
+     <div className="product-page" style={{ paddingTop: '60px' }}>
+  <div className="image-container">
+    <img className="responsive-img" src="shopping.jpg" alt="shoppingback" />
+    <div className="overlay-text">CRAZY OFFERS</div>
+    <div className="balance">
+      <h1>Balance: ${balance.toFixed(2)}</h1>
+      <h2>Earnings: ${totalEarnings.toFixed(2)}</h2>
+    </div>
+  </div>
+</div>
+
+
+      
 
       {purchaseError && <div style={{ color: "red" }}>{purchaseError}</div>}
 

@@ -44,3 +44,78 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+/* Main container */
+.signin-container {
+    background-color: black; /* Plain black background */
+    min-height: 100vh; /* Ensures the background covers the entire screen */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white; /* Text color for readability */
+    padding: 20px;
+}
+
+/* Title */
+.signin-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Form container */
+.signin-form {
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background for the form */
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input fields */
+.signin-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: #222;
+    color: white;
+    font-size: 16px;
+}
+
+/* Submit button */
+.signin-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+/* Error message */
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Signup link */
+.signup-link {
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+.signup-link-text {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.signup-link-text:hover {
+    color: #4CAF50;
+}

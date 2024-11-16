@@ -382,3 +382,59 @@ h2 {
   text-align: center;
   margin-top: 10px;
 }
+.product-page {
+  padding-top: 60px;
+  position: relative;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.responsive-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.overlay-text {
+  position: absolute;
+  top: 20%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.balance {
+  position: absolute;
+  top: 20px;
+  left: 70%;
+ 
+  padding: 10px;
+  color: white;
+  font-family: Arial, sans-serif;
+  border-radius: 8px;
+}
+
+.balance h1,
+.balance h2 {
+  margin: 5px 0;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .overlay-text {
+    font-size: 1.5rem;
+  }
+
+  .balance h1,
+  .balance h2 {
+    font-size: 1.2rem;
+  }
+}

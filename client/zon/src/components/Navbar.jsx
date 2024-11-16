@@ -141,7 +141,7 @@ const Navbar = () => {
                 ) : (
                     <>
                         <Link
-                            to="/"
+                            to="/products"
                             onClick={handleLinkClick} // Close menu on click
                             style={{
                                 color: '#fff',
